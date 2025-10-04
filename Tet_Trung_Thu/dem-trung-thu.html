@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đêm Trung Thu - Mid-Autumn Festival</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <style>
+        /* Overrides specific to this page to enable scrolling inside the letter */
+        .love-letter .envelope-letter {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-right: 6px;
+        }
+
+        .love-letter .envelope-letter::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .love-letter .envelope-letter::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .love-letter .envelope-letter::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #ff8fab, #ff5d8f);
+            border-radius: 6px;
+        }
+
+        /* THEME: Love palette overrides */
+        body {
+            background: radial-gradient(120% 120% at 80% -10%, #ffdde7 0%, #ffc7d9 25%, #f6a6c1 55%, #d26ba0 85%, #8b4789 100%) !important;
+        }
+
+        .moon {
+            background: radial-gradient(100% 100% at 30% 30%, #fff4f7 0%, #ffe3ec 55%, #ffd1dc 100%) !important;
+            box-shadow: 0 0 50px rgba(255, 135, 171, 0.7), 0 0 90px rgba(255, 189, 214, 0.5) !important;
+        }
+
+        .festival-title {
+            color: #ff5d8f !important;
+            text-shadow: 0 0 24px rgba(255, 93, 143, .45) !important;
+        }
+
+        .lantern-body {
+            background: linear-gradient(180deg, #ff7aa8, #ff5d8f) !important;
+            box-shadow: 0 0 22px rgba(255, 120, 160, .55) !important;
+        }
+
+        .lantern-light {
+            background: #ffd1dc !important;
+            box-shadow: 0 0 18px #ffd1dc !important;
+        }
+
+        .tradition-item:hover {
+            box-shadow: 0 10px 34px rgba(255, 93, 143, 0.28) !important;
+        }
+
+        /* Visual enhancements */
+        .envelope-front {
+            position: relative;
+        }
+
+        .envelope-front::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.25) 35%, rgba(255, 255, 255, 0) 70%);
+            transform: translateX(-100%);
+            animation: envelopeShimmer 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes envelopeShimmer {
+
+            0%,
+            20% {
+                transform: translateX(-120%);
+                opacity: 0;
+            }
+
+            35% {
+                opacity: 1;
+            }
+
+            60% {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        .open-hint {
+            position: relative;
+        }
+
+        .open-hint::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 999px;
+            box-shadow: 0 0 0 0 rgba(255, 141, 171, 0.35);
+            animation: hintPulse 2.2s ease-in-out infinite;
+        }
+
+        @keyframes hintPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 141, 171, 0.35);
+            }
+
+            70% {
+                box-shadow: 0 0 0 22px rgba(255, 141, 171, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 141, 171, 0);
+            }
+        }
+
+        .envelope-letter {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .envelope.is-open .envelope-letter {
+            box-shadow: 0 14px 34px rgba(255, 141, 171, 0.25), 0 2px 10px rgba(0, 0, 0, 0.12);
+            animation: letterPopUp 680ms cubic-bezier(.2, .9, .2, 1.05) both, letterGlow 3.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes letterPopUp {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -30%) scale(0.92) rotateX(-6deg);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate(-50%, -63%) scale(1.02) rotateX(0deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -60%) scale(1) rotateX(0deg);
+            }
+        }
+
+        @keyframes letterGlow {
+            0% {
+                outline: 0px solid rgba(255, 93, 143, 0.0);
+            }
+
+            100% {
+                outline: 2px solid rgba(255, 93, 143, 0.12);
+            }
+        }
+
+        /* Floating heart bubbles */
+        .heart-bubble {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            left: 50%;
+            top: 55%;
+            transform: translate(-50%, -50%) scale(0.8) rotate(45deg);
+            background: radial-gradient(circle at 30% 30%, #ff9ab6 0%, #ff5d8f 60%, #e03e6f 100%);
+            opacity: 0;
+            border-radius: 4px;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 6px rgba(255, 93, 143, 0.4));
+            animation: heartFloat 2.6s ease-out forwards;
+        }
+
+        .heart-bubble::before,
+        .heart-bubble::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 30% 30%, #ff9ab6 0%, #ff5d8f 60%, #e03e6f 100%);
+            border-radius: 50%;
+            top: -5px;
+            left: 0;
+        }
+
+        .heart-bubble::after {
+            left: -5px;
+            top: 0;
+        }
+
+        @keyframes heartFloat {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -30%) scale(0.6) rotate(45deg);
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            60% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--dx, 0px)), calc(-130% - var(--dy, 0px))) scale(1.05) rotate(45deg);
+            }
+        }
+
+        #fxCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 12;
+        }
+
+        /* Romantic Letter UI redesign */
+        .envelope-letter {
+            background: radial-gradient(120% 120% at 10% 0%, #fff 0%, #fff8fb 55%, #fff0f6 100%);
+            position: relative;
+        }
+
+        .letter-card {
+            position: relative;
+            background:
+                linear-gradient(180deg, rgba(255, 182, 193, 0.06), rgba(255, 182, 193, 0) 22%),
+                repeating-linear-gradient(0deg, rgba(255, 105, 180, 0.06) 0 2px, rgba(255, 105, 180, 0.02) 2px 36px),
+                #fff;
+            border: 1px solid rgba(255, 105, 180, 0.25);
+            border-radius: 16px;
+            padding: 18px 18px 16px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 8px 28px rgba(255, 93, 143, 0.08);
+            height: 100%;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 10px;
+        }
+
+        .letter-card::before,
+        .letter-card::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle at 30% 30%, #ffd1dc, #ffb6c1);
+            opacity: 0.25;
+            filter: blur(1px);
+            border-radius: 4px;
+            transform: rotate(45deg);
+        }
+
+        .letter-card::before {
+            top: 10px;
+            left: 10px;
+        }
+
+        .letter-card::after {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .letter-header-ui {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .letter-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #e84393;
+            letter-spacing: 0.5px;
+        }
+
+        .letter-date {
+            font-size: 0.9rem;
+            color: #a65d7b;
+            background: rgba(255, 182, 193, 0.25);
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 105, 180, 0.25);
+        }
+
+        .letter-badges {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 0.72rem;
+            color: #b03a66;
+            background: linear-gradient(180deg, #ffe6ee, #ffd5e5);
+            border: 1px solid rgba(255, 105, 180, 0.25);
+            padding: 4px 8px;
+            border-radius: 999px;
+        }
+
+        .letter-divider {
+            position: relative;
+            height: 14px;
+            margin: 4px 0 2px;
+        }
+
+        .letter-divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 6px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 105, 180, 0), rgba(255, 105, 180, 0.4), rgba(255, 105, 180, 0));
+        }
+
+        .letter-divider::after {
+            content: '❤';
+            position: absolute;
+            left: 50%;
+            top: -2px;
+            transform: translateX(-50%);
+            color: #ff5d8f;
+            font-size: 0.8rem;
+            text-shadow: 0 0 6px rgba(255, 93, 143, .35);
+        }
+
+        .letter-body {
+            color: #4a3b45;
+            line-height: 1.8;
+            font-size: 0.98rem;
+        }
+
+        .letter-body p {
+            margin: 0 0 10px;
+        }
+
+        .love-quote {
+            margin: 4px 0 8px;
+            padding: 8px 10px;
+            background: rgba(255, 105, 180, 0.08);
+            border-left: 3px solid rgba(255, 105, 180, 0.45);
+            border-radius: 10px;
+            font-style: italic;
+            color: #8a4b62;
+        }
+
+        .letter-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .signature-name {
+            color: #d81b60;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .heart-stamp {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff9ab6 0%, #ff5d8f 60%, #d81b60 100%);
+            box-shadow: 0 2px 8px rgba(216, 27, 96, 0.35) inset, 0 2px 8px rgba(216, 27, 96, 0.25);
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        /* Enhanced open animations (overrides) */
+        .envelope {
+            transition: transform 0.6s cubic-bezier(.2, .8, .2, 1), filter 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .envelope.is-open {
+            animation: envelopeSettle 700ms cubic-bezier(.2, .8, .2, 1) 120ms both;
+        }
+
+        @keyframes envelopeSettle {
+            0% {
+                transform: translateY(-2px) rotateZ(-1deg) scale(1.01);
+            }
+
+            60% {
+                transform: translateY(2px) rotateZ(1deg) scale(1.005);
+            }
+
+            100% {
+                transform: translateY(0) rotateZ(0) scale(1);
+            }
+        }
+
+        /* Flap flip with overshoot */
+        .envelope .envelope-flap {
+            transform-origin: top center;
+            backface-visibility: hidden;
+        }
+
+        .envelope.is-open .envelope-flap {
+            animation: flapFlip 820ms cubic-bezier(.2, .8, .2, 1) forwards;
+        }
+
+        @keyframes flapFlip {
+            0% {
+                transform: rotateX(0deg);
+            }
+
+            70% {
+                transform: rotateX(172deg);
+            }
+
+            100% {
+                transform: rotateX(160deg);
+            }
+        }
+
+        /* Closing animation (smooth reverse) */
+        .envelope.is-open.is-closing .envelope-flap {
+            animation: flapFlipBack 700ms cubic-bezier(.2, .8, .2, 1) forwards;
+        }
+
+        @keyframes flapFlipBack {
+            0% {
+                transform: rotateX(160deg);
+            }
+
+            30% {
+                transform: rotateX(175deg);
+            }
+
+            100% {
+                transform: rotateX(0deg);
+            }
+        }
+
+        .envelope.is-open.is-closing .envelope-letter {
+            animation: letterHide 480ms ease-out forwards;
+        }
+
+        @keyframes letterHide {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -60%) rotateX(0deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -40%) rotateX(-8deg);
+            }
+        }
+
+        /* Seal pop */
+        .envelope .seal {
+            transform-origin: center;
+        }
+
+        .envelope.is-open .seal {
+            animation: sealPop 500ms ease-out forwards;
+        }
+
+        @keyframes sealPop {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.12) rotate(8deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(0) rotate(25deg);
+                opacity: 0;
+            }
+        }
+
+        /* Simulated side flaps using pseudo-elements on the front */
+        .envelope-front::before,
+        .envelope-front::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-bottom: 26% solid transparent;
+            transition: transform 600ms cubic-bezier(.2, .8, .2, 1), opacity 300ms ease;
+            opacity: 0.85;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .15));
+        }
+
+        .envelope-front::before {
+            left: 0;
+            border-left: 46% solid rgba(255, 194, 208, 0.85);
+            transform-origin: bottom left;
+        }
+
+        .envelope-front::after {
+            right: 0;
+            border-right: 46% solid rgba(255, 194, 208, 0.85);
+            transform-origin: bottom right;
+        }
+
+        .envelope.is-open .envelope-front::before {
+            transform: rotateZ(-12deg) translateY(-2px);
+            opacity: 1;
+        }
+
+        .envelope.is-open .envelope-front::after {
+            transform: rotateZ(12deg) translateY(-2px);
+            opacity: 1;
+        }
+
+        .envelope.is-open.is-closing .envelope-front::before {
+            transform: rotateZ(0deg) translateY(0);
+            opacity: 0.9;
+        }
+
+        .envelope.is-open.is-closing .envelope-front::after {
+            transform: rotateZ(0deg) translateY(0);
+            opacity: 0.9;
+        }
+
+        /* Opening ripple */
+        .open-ripple {
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 93, 143, 0.35);
+            pointer-events: none;
+            animation: rippleExpand 900ms ease-out forwards;
+        }
+
+        @keyframes rippleExpand {
+            0% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(0.4);
+            }
+
+            70% {
+                opacity: 0.25;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(16);
+            }
+        }
+    </style>
+    </style>
+    <!-- Background Elements -->
+    <div class="stars"></div>
+    <div class="clouds">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+    <div class="floating-lanterns" aria-hidden="true"></div>
+    <canvas id="fxCanvas" aria-hidden="true"></canvas>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="moon-container">
+            <div class="moon">
+                <div class="moon-glow"></div>
+            </div>
+        </div>
+        <h1 class="festival-title">Đêm Trung Thu</h1>
+        <p class="festival-subtitle">Mid-Autumn Festival</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="love-letter" id="love-letter">
+            <div class="envelope" aria-label="Love Letter" role="button" tabindex="0">
+                <div class="envelope-back"></div>
+                <div class="envelope-letter" aria-hidden="true">
+                    <div class="letter-card">
+                        <div class="letter-header-ui">
+                            <div>
+                                <div class="letter-title">Thư Gửi Em</div>
+                                <div class="letter-badges">
+                                    <span class="badge">Trung Thu</span>
+                                    <span class="badge">Yêu Thương</span>
+                                    <span class="badge">Mãi Bên Nhau</span>
+                                </div>
+                            </div>
+                            <div class="letter-date">Rằm tháng Tám, 2025</div>
+                        </div>
+
+                        <div class="letter-divider"></div>
+
+                        <div class="letter-body" aria-live="polite">
+                            <p>Đêm nay, dưới ánh trăng tròn dịu ngọt, anh viết cho em những dòng này bằng tất cả thương
+                                yêu trong tim.</p>
+                            <p class="love-quote">Em là điều dịu dàng nhất trong những điều dịu dàng. Là vầng trăng của
+                                riêng anh.</p>
+                            <p>Mỗi mùa trăng qua đi, anh chỉ mong được nắm tay em, cùng đi qua những bình yên và bão
+                                giông, cùng mỉm cười khi ngày mới đến.</p>
+                            <div class="love-message">
+                                <p class="love-line">Nếu trăng có lời, chắc hẳn sẽ nói thay anh: Yêu em.</p>
+                                <p class="love-line">Nếu gió có lời, sẽ khẽ khàng gửi đến em ôm ấm áp.</p>
+                                <p class="love-line">Nếu thời gian có lời, sẽ hứa cho chúng mình những bình yên dài lâu.
+                                </p>
+                                <p class="love-line">Anh thương em, hôm nay — và tất cả ngày sau.</p>
+                            </div>
+                        </div>
+
+                        <div class="letter-footer">
+                            <div>— <span class="signature-name">Anh</span></div>
+                            <div class="heart-stamp">💖</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="envelope-front">
+                    <div class="envelope-flap"></div>
+                    <div class="seal" aria-hidden="true">
+                        <span class="heart">❤</span>
+                    </div>
+                </div>
+            </div>
+            <button class="open-hint" type="button">Nhấn để mở phong thư</button>
+        </section>
+        <section class="hero-section">
+            <div class="lanterns">
+                <div class="lantern lantern-1">
+                    <div class="lantern-body"></div>
+                    <div class="lantern-light"></div>
+                </div>
+                <div class="lantern lantern-2">
+                    <div class="lantern-body"></div>
+                    <div class="lantern-light"></div>
+                </div>
+                <div class="lantern lantern-3">
+                    <div class="lantern-body"></div>
+                    <div class="lantern-light"></div>
+                </div>
+            </div>
+
+            <div class="content-container">
+                <div class="welcome-text">
+                    <h2>Chào Mừng Tết Trung Thu</h2>
+                    <p>Đêm trăng tròn nhất trong năm, khi gia đình quây quần bên nhau, cùng thưởng thức bánh trung thu
+                        và ngắm trăng. Một dịp đặc biệt để thể hiện tình yêu thương và sự đoàn kết.</p>
+                </div>
+
+                <div class="mooncake-section">
+                    <div class="mooncake-container">
+                        <div class="mooncake">
+                            <div class="mooncake-top"></div>
+                            <div class="mooncake-bottom"></div>
+                            <div class="mooncake-pattern"></div>
+                        </div>
+                    </div>
+                    <div class="rabbit-container">
+                        <div class="rabbit">
+                            <div class="rabbit-body"></div>
+                            <div class="rabbit-head"></div>
+                            <div class="rabbit-ear ear-left"></div>
+                            <div class="rabbit-ear ear-right"></div>
+                            <div class="rabbit-eye eye-left"></div>
+                            <div class="rabbit-eye eye-right"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blessing-text">
+                    <h3>Lời Chúc Trung Thu</h3>
+                    <p>"Chúc mọi người một mùa Trung Thu ấm áp, hạnh phúc. Mong rằng ánh trăng sẽ soi sáng con đường của
+                        mỗi người, mang đến may mắn và thành công."</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="traditions-section">
+            <h2>Truyền Thống Trung Thu</h2>
+            <div class="traditions-grid">
+                <div class="tradition-item">
+                    <div class="tradition-icon">🌕</div>
+                    <h3>Ngắm Trăng</h3>
+                    <p>Thưởng thức vẻ đẹp của ánh trăng tròn vàng</p>
+                </div>
+                <div class="tradition-item">
+                    <div class="tradition-icon">🥮</div>
+                    <h3>Bánh Trung Thu</h3>
+                    <p>Thưởng thức bánh trung thu truyền thống</p>
+                </div>
+                <div class="tradition-item">
+                    <div class="tradition-icon">🏮</div>
+                    <h3>Đèn Lồng</h3>
+                    <p>Thắp sáng đèn lồng đỏ rực rỡ</p>
+                </div>
+                <div class="tradition-item">
+                    <div class="tradition-icon">👨‍👩‍👧‍👦</div>
+                    <h3>Đoàn Tụ</h3>
+                    <p>Gia đình quây quần bên nhau</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Đêm Trung Thu - Mid-Autumn Festival. Made with ❤️ for Vietnamese culture.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Spawn floating heart bubbles when the envelope opens
+        (function () {
+            const envelope = document.querySelector('.envelope');
+            if (!envelope) return;
+
+            function spawnHearts(n = 8) {
+                const host = envelope;
+                for (let i = 0; i < n; i++) {
+                    const h = document.createElement('div');
+                    h.className = 'heart-bubble';
+                    const dx = (Math.random() * 60 - 30) + 'px';
+                    const dy = (Math.random() * 40 - 10) + 'px';
+                    const delay = (i * 80 + Math.random() * 120) + 'ms';
+                    const scale = 0.8 + Math.random() * 0.6;
+                    h.style.setProperty('--dx', dx);
+                    h.style.setProperty('--dy', dy);
+                    h.style.animationDelay = delay;
+                    h.style.transform += ` scale(${scale})`;
+                    host.appendChild(h);
+                    setTimeout(() => h.remove(), 3000);
+                }
+            }
+
+            const observer = new MutationObserver(mutations => {
+                for (const m of mutations) {
+                    if (m.type === 'attributes' && m.attributeName === 'class') {
+                        if (envelope.classList.contains('is-open')) {
+                            spawnHearts(10);
+                            // opening ripple element
+                            const ripple = document.createElement('div');
+                            ripple.className = 'open-ripple';
+                            envelope.appendChild(ripple);
+                            setTimeout(() => ripple.remove(), 1000);
+
+                            // synth click to reuse fireworks at envelope center
+                            const rect = envelope.getBoundingClientRect();
+                            const cx = rect.left + rect.width / 2;
+                            const cy = rect.top + rect.height * 0.45;
+                            document.dispatchEvent(new MouseEvent('click', { clientX: cx, clientY: cy }));
+                        }
+                    }
+                }
+            });
+            observer.observe(envelope, { attributes: true });
+        })();
+        // Click fireworks + hearts anywhere on the page
+        (function () {
+            const canvas = document.getElementById('fxCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let dpr = Math.max(1, window.devicePixelRatio || 1);
+            function resize() {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                canvas.width = Math.floor(w * dpr);
+                canvas.height = Math.floor(h * dpr);
+                canvas.style.width = w + 'px';
+                canvas.style.height = h + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = [];
+            function addFirework(x, y, hue) {
+                const count = 24 + Math.floor(Math.random() * 12);
+                const baseHue = hue ?? (Math.random() * 360);
+                for (let i = 0; i < count; i++) {
+                    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.2;
+                    const speed = 1.8 + Math.random() * 2.2;
+                    particles.push({
+                        type: 'spark', x, y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 0.5,
+                        life: 48 + Math.random() * 18,
+                        age: 0,
+                        hue: baseHue,
+                    });
+                }
+            }
+
+            function addHeartBurst(x, y) {
+                const count = 8 + Math.floor(Math.random() * 6);
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 0.8 + Math.random() * 1.2;
+                    particles.push({
+                        type: 'heart', x, y,
+                        vx: Math.cos(angle) * speed * 0.8,
+                        vy: Math.sin(angle) * speed * 0.6 - 0.6,
+                        life: 60 + Math.random() * 20,
+                        age: 0,
+                        size: 6 + Math.random() * 6,
+                        hue: 340 + Math.random() * 20,
+                    });
+                }
+            }
+
+            function drawHeart(ctx, x, y, size, color) {
+                const s = size;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(0.25);
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-s, -s, -s * 2, s * 0.6, 0, s * 1.8);
+                ctx.bezierCurveTo(s * 2, s * 0.6, s, -s, 0, 0);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.age++;
+                    if (p.age > p.life) { particles.splice(i, 1); continue; }
+                    p.vy += 0.02;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    const t = p.age / p.life;
+                    if (p.type === 'spark') {
+                        ctx.globalAlpha = 1 - t;
+                        ctx.fillStyle = `hsl(${p.hue}, 90%, ${60 - t * 40}%)`;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 2.2 - t * 1.4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.globalAlpha = 0.25 * (1 - t);
+                        ctx.beginPath();
+                        ctx.arc(p.x - p.vx * 1.4, p.y - p.vy * 1.4, 1.2 - t * 1.0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.globalAlpha = 1;
+                    } else if (p.type === 'heart') {
+                        ctx.globalAlpha = Math.max(0, 1 - t);
+                        drawHeart(ctx, p.x, p.y, p.size * (0.9 + (1 - t) * 0.3), `hsla(${p.hue}, 80%, 60%, ${1 - t})`);
+                        ctx.globalAlpha = 1;
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            document.addEventListener('click', (e) => {
+                addFirework(e.clientX, e.clientY);
+                addHeartBurst(e.clientX, e.clientY);
+            });
+        })();
+    </script>
+</body>
+
+</html>
