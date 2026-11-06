@@ -18,10 +18,10 @@ export function SummaryPage() {
 
   return (
     <div>
-      <PageTitle>TỔNG HỢP</PageTitle>
+      <PageTitle>Tổng hợp</PageTitle>
 
       {unassigned > 0 && (
-        <Link to="/tasks" className="mb-3 block rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        <Link to="/tasks" className="mb-4 block rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-amber-900">
           ⚠️ Có {unassigned} công việc chưa chọn Bên, chưa được tính vào chi phí.
         </Link>
       )}
@@ -31,18 +31,18 @@ export function SummaryPage() {
           {rows.map((r) => (
             <div
               key={r.stt}
-              className="rounded-xl border border-gray-200 p-2.5"
-              style={{ background: r.highlight ? '#F3D3DC' : '#fff', borderColor: r.highlight ? '#e7b3c2' : undefined }}
+              className="rounded-2xl border border-[#efe5e9] p-3.5 shadow-[0_1px_3px_rgba(80,30,45,.06)]"
+              style={{ background: r.highlight ? 'linear-gradient(135deg,#fbe9ee,#f3d3dc)' : '#fff', borderColor: r.highlight ? '#ecc3cf' : undefined }}
             >
-              <div className={`mb-1 text-[15px] leading-snug ${r.highlight ? 'font-bold text-wine' : 'font-semibold'}`}>
-                <span className="mr-1 text-gray-400">{r.stt}.</span>
+              <div className={`mb-2 text-[14px] leading-snug ${r.highlight ? 'font-bold text-wine' : 'font-medium text-[#2b2326]'}`}>
+                <span className="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f6eef1] text-[11px] font-semibold text-wine/70">{r.stt}</span>
                 {r.label}
               </div>
               <div className="grid grid-cols-3 gap-1 text-right">
                 {(['TRAI', 'GAI', 'total'] as const).map((k) => (
                   <div key={k} className={k === 'total' ? 'border-l border-gray-300 pl-1' : ''}>
-                    <div className="text-[11px] text-gray-500">{k === 'TRAI' ? 'Nhà Trai' : k === 'GAI' ? 'Nhà Gái' : 'Tổng cộng'}</div>
-                    <div className={k === 'total' || r.highlight ? 'font-bold' : ''}>{cell(r[k], r.kind, r.negativeRed)}</div>
+                    <div className="text-[11px] text-gray-400">{k === 'TRAI' ? 'Nhà Trai' : k === 'GAI' ? 'Nhà Gái' : 'Tổng cộng'}</div>
+                    <div className={`text-[15px] ${k === 'total' || r.highlight ? 'font-bold' : 'font-medium'}`}>{cell(r[k], r.kind, r.negativeRed)}</div>
                   </div>
                 ))}
               </div>
@@ -50,7 +50,7 @@ export function SummaryPage() {
           ))}
         </div>
       ) : (
-      <div className="overflow-x-auto rounded-lg">
+      <div className="overflow-x-auto rounded-xl shadow-sm">
         <table className="tbl text-[15px] md:text-base">
           <thead>
             <tr>
@@ -101,9 +101,9 @@ export function SummaryPage() {
 
 function QuickLink({ to, color, title, value }: { to: string; color: string; title: string; value: string }) {
   return (
-    <Link to={to} className="rounded-xl border bg-white p-3 shadow-sm transition hover:shadow" style={{ borderLeft: `4px solid ${color}` }}>
-      <div className="text-sm text-gray-500">{title}</div>
-      <div className="text-lg font-bold" style={{ color }}>
+    <Link to={to} className="rounded-2xl border border-[#efe5e9] bg-white p-3.5 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-center gap-1.5 text-[13px] text-gray-500"><span className="h-2 w-2 rounded-full" style={{ background: color }} />{title}</div>
+      <div className="mt-0.5 text-lg font-bold" style={{ color }}>
         {value}
       </div>
     </Link>

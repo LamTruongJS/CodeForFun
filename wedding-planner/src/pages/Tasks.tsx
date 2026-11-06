@@ -10,11 +10,11 @@ import { confirmDialog, toast } from '../store/ui'
 import { useAppStore } from '../store/useAppStore'
 
 const FIELDS: FieldDef[] = [
-  { key: 'name', label: 'Tên công việc', type: 'text', required: true },
-  { key: 'amount', label: 'Số tiền (VNĐ)', type: 'number' },
-  { key: 'deposit', label: 'Đã cọc (VNĐ)', type: 'number' },
-  { key: 'side', label: 'Bên', type: 'select', placeholder: '— Chọn bên —', options: SIDE_OPTIONS },
-  { key: 'status', label: 'Tiến độ', type: 'select', placeholder: '— Chưa làm —', options: STATUS_OPTIONS },
+  { key: 'name', label: 'Tên công việc', type: 'text', required: true, placeholder: 'VD: Thuê xe rước dâu' },
+  { key: 'amount', label: 'Số tiền', type: 'number', variant: 'money', half: true },
+  { key: 'deposit', label: 'Đã cọc', type: 'number', variant: 'money', half: true },
+  { key: 'side', label: 'Bên', type: 'select', placeholder: 'Chọn bên', options: SIDE_OPTIONS, half: true },
+  { key: 'status', label: 'Tiến độ', type: 'select', placeholder: 'Chưa làm', options: STATUS_OPTIONS, half: true },
   { key: 'note', label: 'Ghi chú', type: 'textarea' },
 ]
 
@@ -52,7 +52,7 @@ export function TasksPage() {
   return (
     <div>
       <PageTitle right={desktop ? <Btn onClick={() => newRowRef.current?.focus()}>+ Thêm việc</Btn> : undefined}>
-        CÔNG VIỆC CẦN LÀM
+        Công việc cần làm
       </PageTitle>
 
       <div className="mb-3 space-y-2">
@@ -97,7 +97,7 @@ export function TasksPage() {
 
       <SortableList ids={shown.map((t) => t.id)} disabled={filtering} onMove={reorderTask}>
         {desktop ? (
-          <div className="max-h-[calc(100dvh-300px)] min-h-64 overflow-auto rounded-lg">
+          <div className="max-h-[calc(100dvh-320px)] min-h-64 overflow-auto rounded-xl shadow-sm">
             <table className="tbl">
               <thead>
                 <tr>
@@ -164,7 +164,8 @@ export function TasksPage() {
 
       {sheet && (
         <EditSheet
-          title={sheet === 'new' ? 'Thêm công việc' : `Sửa công việc #${stt.get(sheet.id)}`}
+          title={sheet === 'new' ? 'Thêm công việc' : 'Sửa công việc'}
+          subtitle={sheet === 'new' ? undefined : `STT ${stt.get(sheet.id)}`}
           fields={FIELDS}
           initial={sheet === 'new' ? {} : (sheet as unknown as Values)}
           onClose={() => setSheet(null)}
@@ -172,8 +173,8 @@ export function TasksPage() {
           extra={(v) => {
             const rem = taskRemaining({ amount: v.amount as number | null, deposit: v.deposit as number | null })
             return (
-              <div className="flex justify-between rounded-lg bg-calc px-3 py-2.5 text-gray-600">
-                <span>Còn lại (tự tính)</span>
+              <div className="flex items-center justify-between rounded-2xl bg-[#f6f1f3] px-4 py-3 text-gray-600">
+                <span className="text-[13px] font-medium">Còn lại (tự tính)</span>
                 <b className="num" style={{ color: rem > 0 ? '#C55A11' : undefined }}>
                   {fmtMoney(rem)}
                 </b>
@@ -211,8 +212,8 @@ function FilterRow<V extends string>({
         <button
           key={v}
           onClick={() => onChange(v)}
-          className={`shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap ${
-            value === v ? 'border-[#ED7D31] bg-[#ED7D31] text-white' : 'border-gray-300 bg-white text-gray-700'
+          className={`shrink-0 rounded-full border-[1.5px] px-3.5 py-1 text-[13px] font-medium whitespace-nowrap transition ${
+            value === v ? 'border-[#ED7D31] bg-[#ED7D31] text-white' : 'border-[#ebe0e4] bg-white text-gray-600'
           }`}
         >
           {l}
@@ -271,7 +272,7 @@ function TaskCard({ t, stt, onOpen, onPatch }: { t: Task; stt: number; onOpen: (
     <div
       ref={ref}
       style={{ ...style, background: done ? '#D9EAD3' : '#fff' }}
-      className="flex items-start gap-2 rounded-xl border border-gray-200 p-2.5"
+      className="flex items-start gap-2 rounded-2xl border border-[#efe5e9] p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition active:scale-[.99]"
       onClick={onOpen}
     >
       <div className="flex flex-col items-center">
@@ -279,7 +280,7 @@ function TaskCard({ t, stt, onOpen, onPatch }: { t: Task; stt: number; onOpen: (
         <span className="num text-xs text-gray-400">{stt}</span>
       </div>
       <div className="min-w-0 flex-1">
-        <div className="font-bold leading-snug">{t.name}</div>
+        <div className="leading-snug font-semibold text-[#2b2326]">{t.name}</div>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           <ChipSelect value={t.side} options={SIDE_OPTIONS} placeholder="Chọn bên" onChange={(v) => onPatch({ side: v })} />
           <ChipSelect value={t.status} options={STATUS_OPTIONS} placeholder="Tiến độ" onChange={(v) => onPatch({ status: v })} />

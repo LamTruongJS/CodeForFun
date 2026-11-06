@@ -1,17 +1,27 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { fmtInput, parseIntInput } from '../lib/format'
 
+type Base = { key: string; label: string; half?: boolean }
 export type FieldDef =
-  | { key: string; label: string; type: 'text' | 'textarea'; required?: boolean; placeholder?: string }
-  | { key: string; label: string; type: 'number'; required?: boolean; placeholder?: string; disabledWhen?: (v: Values) => boolean }
-  | { key: string; label: string; type: 'select'; options: { value: string; label: string }[]; placeholder: string }
-  | { key: string; label: string; type: 'toggle' }
+  | (Base & { type: 'text' | 'textarea'; required?: boolean; placeholder?: string; icon?: ReactNode })
+  | (Base & {
+      type: 'number'
+      required?: boolean
+      placeholder?: string
+      /** 'money' → nền vàng nhạt + hậu tố "đ"; 'stepper' → nút − / + */
+      variant?: 'money' | 'stepper' | 'plain'
+      suffix?: string
+      disabledWhen?: (v: Values) => boolean
+    })
+  | (Base & { type: 'select'; options: { value: string; label: string }[]; placeholder: string })
+  | (Base & { type: 'toggle'; hint?: string })
 
 export type Values = Record<string, string | number | boolean | null>
 
 /** Form dạng "bottom sheet" cho điện thoại (modal giữa màn hình trên desktop). */
 export function EditSheet({
   title,
+  subtitle,
   fields,
   initial,
   onSave,
@@ -20,6 +30,7 @@ export function EditSheet({
   extra,
 }: {
   title: string
+  subtitle?: string
   fields: FieldDef[]
   initial: Values
   onSave: (v: Values) => void
@@ -55,6 +66,10 @@ export function EditSheet({
       const raw = vals[f.key]
       if (f.type === 'toggle') out[f.key] = Boolean(raw)
       else if (f.type === 'number') {
+        if (f.disabledWhen?.(out)) {
+          out[f.key] = null
+          continue
+        }
         const r = parseIntInput(String(raw))
         if (!r.ok) errs[f.key] = r.error
         else if (f.required && r.value == null) errs[f.key] = 'Không được để trống'
@@ -74,91 +89,224 @@ export function EditSheet({
     setErrors(r.errs)
     if (r.ok) onSave(r.out)
   }
+  const set = (key: string, v: string | boolean) => {
+    setVals((s) => ({ ...s, [key]: v }))
+    setErrors((e) => ({ ...e, [key]: '' }))
+  }
+
+  const renderField = (f: FieldDef) => {
+    const err = errors[f.key]
+    const cls = `field ${err ? 'invalid' : ''}`
+
+    if (f.type === 'toggle')
+      return (
+        <label key={f.key} className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl bg-[#f6f1f3] px-4 py-3">
+          <span>
+            <span className="block font-medium">{f.label}</span>
+            {f.hint && <span className="block text-[13px] text-gray-500">{f.hint}</span>}
+          </span>
+          <input type="checkbox" className="sr-only" checked={Boolean(vals[f.key])} onChange={(e) => set(f.key, e.target.checked)} />
+          <Switch on={Boolean(vals[f.key])} />
+        </label>
+      )
+
+    let control: ReactNode
+    if (f.type === 'textarea') {
+      control = <textarea className={cls} rows={2} value={String(vals[f.key])} onChange={(e) => set(f.key, e.target.value)} placeholder={f.placeholder} />
+    } else if (f.type === 'select') {
+      control = (
+        <div className="relative">
+          <select className={`${cls} appearance-none pr-10`} value={String(vals[f.key])} onChange={(e) => set(f.key, e.target.value)}>
+            <option value="">{f.placeholder}</option>
+            {f.options.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <Chevron />
+        </div>
+      )
+    } else if (f.type === 'number') {
+      const disabled = f.disabledWhen?.(live) ?? false
+      const raw = String(vals[f.key])
+      const reformat = () => {
+        const r = parseIntInput(raw)
+        if (r.ok) set(f.key, fmtInput(r.value))
+      }
+      if (f.variant === 'stepper') {
+        const cur = parseIntInput(raw)
+        const n = cur.ok ? (cur.value ?? 0) : 0
+        control = (
+          <div className="flex items-center gap-2">
+            <StepBtn label="Giảm" disabled={n <= 0} onClick={() => set(f.key, String(Math.max(0, n - 1)))}>
+              −
+            </StepBtn>
+            <input
+              className={`${cls} num text-center text-lg font-semibold`}
+              inputMode="numeric"
+              value={raw}
+              onChange={(e) => set(f.key, e.target.value)}
+              onBlur={reformat}
+            />
+            <StepBtn label="Tăng" onClick={() => set(f.key, String(n + 1))}>
+              +
+            </StepBtn>
+          </div>
+        )
+      } else {
+        const suffix = f.suffix ?? (f.variant === 'money' ? 'VNĐ' : undefined)
+        control = (
+          <div className="relative">
+            <input
+              className={`${cls} num ${f.variant === 'money' ? 'money' : ''} ${suffix ? 'pr-14' : ''} text-right`}
+              inputMode="numeric"
+              value={disabled ? '' : raw}
+              placeholder={disabled ? 'Tự tính' : (f.placeholder ?? '0')}
+              disabled={disabled}
+              onChange={(e) => set(f.key, e.target.value)}
+              onBlur={reformat}
+            />
+            {suffix && !disabled && (
+              <span className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-[12px] font-medium text-gray-400">{suffix}</span>
+            )}
+          </div>
+        )
+      }
+    } else {
+      control = (
+        <div className="relative">
+          {f.icon && <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-gray-400">{f.icon}</span>}
+          <input
+            className={`${cls} ${f.icon ? 'pl-10' : ''}`}
+            value={String(vals[f.key])}
+            onChange={(e) => set(f.key, e.target.value)}
+            placeholder={f.placeholder}
+            autoFocus={f.key === 'name' && !initial.name}
+          />
+        </div>
+      )
+    }
+
+    return (
+      <label key={f.key} className={`block min-w-0 ${f.half ? '' : 'col-span-2'}`}>
+        <span className="mb-1.5 block text-[13px] font-medium text-gray-600">
+          {f.label}
+          {'required' in f && f.required && <span className="text-wine"> *</span>}
+        </span>
+        {control}
+        {err && (
+          <span className="mt-1.5 flex items-center gap-1 text-[13px] text-red-600">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z" />
+            </svg>
+            {err}
+          </span>
+        )}
+      </label>
+    )
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 md:items-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#2b1a20]/45 backdrop-blur-[2px] md:items-center" onClick={onClose}>
       <form
-        className="anim-sheet flex max-h-[92dvh] w-full flex-col rounded-t-2xl bg-white shadow-xl md:max-w-lg md:rounded-2xl"
+        className="anim-sheet flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl md:max-w-lg md:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault()
           submit()
         }}
       >
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <h2 className="text-lg font-bold text-wine">{title}</h2>
-          <button type="button" onClick={onClose} className="rounded-full px-3 py-1 text-2xl leading-none text-gray-500 hover:bg-gray-100" aria-label="Đóng">
-            ×
+        {/* thanh kéo (trang trí) trên điện thoại */}
+        <div className="flex justify-center pt-2.5 md:hidden">
+          <span className="h-1.5 w-10 rounded-full bg-gray-200" />
+        </div>
+
+        <div className="flex items-start justify-between gap-3 px-5 pt-3 pb-2 md:pt-5">
+          <div className="min-w-0">
+            <h2 className="font-display text-[22px] leading-tight font-bold text-wine">{title}</h2>
+            {subtitle && <p className="mt-0.5 truncate text-[13px] text-gray-500">{subtitle}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200"
+            aria-label="Đóng"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
           </button>
         </div>
-        <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
-          {fields.map((f) => {
-            const err = errors[f.key]
-            const base = `w-full rounded-lg border px-3 py-2.5 text-base outline-none focus:border-wine focus:ring-2 focus:ring-wine/20 ${
-              err ? 'border-red-500 bg-red-50' : 'border-gray-300'
-            }`
-            const set = (v: string | boolean) => {
-              setVals((s) => ({ ...s, [f.key]: v }))
-              setErrors((e) => ({ ...e, [f.key]: '' }))
-            }
-            if (f.type === 'toggle')
-              return (
-                <label key={f.key} className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2.5">
-                  <span>{f.label}</span>
-                  <input type="checkbox" className="h-5 w-5 accent-[#8E2C48]" checked={Boolean(vals[f.key])} onChange={(e) => set(e.target.checked)} />
-                </label>
-              )
-            const disabled = f.type === 'number' && f.disabledWhen?.(live)
-            return (
-              <label key={f.key} className="block">
-                <span className="mb-1 block text-sm text-gray-600">
-                  {f.label}
-                  {'required' in f && f.required && <span className="text-red-600"> *</span>}
-                </span>
-                {f.type === 'textarea' ? (
-                  <textarea className={base} rows={2} value={String(vals[f.key])} onChange={(e) => set(e.target.value)} placeholder={f.placeholder} />
-                ) : f.type === 'select' ? (
-                  <select className={base + ' bg-white'} value={String(vals[f.key])} onChange={(e) => set(e.target.value)}>
-                    <option value="">{f.placeholder}</option>
-                    {f.options.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    className={`${base} ${f.type === 'number' ? 'num text-right' : ''} ${disabled ? 'bg-calc text-gray-500' : ''} ${
-                      f.type === 'number' && !disabled ? 'bg-input' : ''
-                    }`}
-                    inputMode={f.type === 'number' ? 'numeric' : undefined}
-                    value={disabled ? '(tự tính)' : String(vals[f.key])}
-                    disabled={disabled}
-                    onChange={(e) => set(e.target.value)}
-                    placeholder={f.placeholder}
-                    autoFocus={f.key === 'name' && !initial.name}
-                  />
-                )}
-                {err && <span className="mt-1 block text-sm text-red-600">{err}</span>}
-              </label>
-            )
-          })}
-          {extra?.(live)}
+
+        <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-4 overflow-y-auto px-5 pt-2 pb-5">
+          {fields.map(renderField)}
+          {extra && <div className="col-span-2">{extra(live)}</div>}
         </div>
-        <div className="safe-bottom flex gap-2 border-t px-4 py-3">
+
+        <div className="safe-bottom flex items-center gap-2 border-t border-gray-100 bg-white px-5 py-3">
           {onDelete && (
-            <button type="button" onClick={onDelete} className="rounded-lg border border-red-300 px-4 py-2.5 text-red-700 hover:bg-red-50">
+            <button
+              type="button"
+              onClick={onDelete}
+              className="flex h-12 items-center gap-1.5 rounded-2xl px-3 font-medium text-red-600 transition hover:bg-red-50"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+              </svg>
               Xóa
             </button>
           )}
-          <button type="button" onClick={onClose} className="ml-auto rounded-lg border border-gray-300 px-4 py-2.5 hover:bg-gray-50">
+          <button type="button" onClick={onClose} className="ml-auto h-12 rounded-2xl px-5 font-medium text-gray-600 transition hover:bg-gray-100">
             Hủy
           </button>
-          <button type="submit" className="rounded-lg bg-wine px-5 py-2.5 font-bold text-white hover:opacity-90">
+          <button
+            type="submit"
+            className="h-12 min-w-[120px] rounded-2xl bg-gradient-to-b from-[#9b3352] to-[#7d2640] px-6 font-semibold text-white shadow-md shadow-wine/25 transition active:scale-[.98]"
+          >
             Lưu
           </button>
         </div>
       </form>
     </div>
+  )
+}
+
+function StepBtn({ children, onClick, disabled, label }: { children: ReactNode; onClick: () => void; disabled?: boolean; label: string }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-[1.5px] border-[#ebe3e6] bg-white text-2xl text-wine transition active:scale-95 disabled:opacity-35"
+    >
+      {children}
+    </button>
+  )
+}
+
+export function Switch({ on }: { on: boolean }) {
+  return (
+    <span className={`relative inline-block h-7 w-12 shrink-0 rounded-full transition-colors ${on ? 'bg-[#70AD47]' : 'bg-gray-300'}`}>
+      <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all ${on ? 'left-[22px]' : 'left-0.5'}`} />
+    </span>
+  )
+}
+
+function Chevron() {
+  return (
+    <svg
+      className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-gray-400"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
   )
 }

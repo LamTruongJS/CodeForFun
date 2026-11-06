@@ -1,21 +1,26 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-serif: 'Times New Roman', Times, serif;
+  --font-sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --color-wine-dark: #6f1f37;
   --color-wine: #8e2c48;
   --color-blush: #f8e5ea;
   --color-rose: #f3d3dc;
-  --color-line: #9e9e9e;
+  --color-line: #e2d7db;
   --color-input: #fff2cc;
   --color-calc: #eeeeee;
 }
 
 html,
 body {
-  font-family: var(--font-serif);
-  font-size: 16px;
-  background: #fbf7f8;
-  color: #222;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  background: #faf6f7;
+  color: #2b2326;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
 }
@@ -25,7 +30,7 @@ body {
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
-  font-size: 16px;
+  font-size: 15px;
 }
 .tbl th,
 .tbl td {
@@ -44,8 +49,10 @@ body {
   z-index: 3;
   background: var(--color-wine);
   color: #fff;
-  font-weight: 700;
-  padding: 8px 6px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  padding: 10px 8px;
   text-align: center;
   border-top: 1px solid var(--color-line);
   white-space: nowrap;
@@ -111,10 +118,11 @@ body {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 9999px;
-  padding: 2px 12px;
+  padding: 3px 12px;
   font: inherit;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
   cursor: pointer;
   field-sizing: content;
   max-width: 100%;
@@ -150,4 +158,57 @@ body {
 }
 .anim-sheet {
   animation: sheet-up 0.18s ease-out;
+}
+
+/* Ô nhập trong form (bottom sheet) */
+.field {
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid #ebe3e6;
+  background: #fbf9fa;
+  padding: 0 14px;
+  font-size: 16px; /* >= 16px để iOS không tự phóng to */
+  color: #2b2326;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
+}
+textarea.field {
+  height: auto;
+  min-height: 80px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+.field::placeholder {
+  color: #b5a9ad;
+}
+.field:focus {
+  background: #fff;
+  border-color: #8e2c48;
+  box-shadow: 0 0 0 4px rgba(142, 44, 72, 0.1);
+}
+.field.money {
+  background: #fffaf0;
+  border-color: #f1e2bd;
+}
+.field.money:focus {
+  background: #fff;
+  border-color: #8e2c48;
+}
+.field.invalid {
+  border-color: #e05252;
+  background: #fff5f5;
+  box-shadow: 0 0 0 4px rgba(224, 82, 82, 0.1);
+}
+.field:disabled {
+  background: #f1eeef;
+  color: #8a7f83;
+  border-color: #ebe3e6;
+}
+
+.font-display {
+  font-family: var(--font-display);
 }

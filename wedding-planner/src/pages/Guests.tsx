@@ -10,12 +10,12 @@ import { confirmDialog, toast } from '../store/ui'
 import { useAppStore } from '../store/useAppStore'
 
 const FIELDS: FieldDef[] = [
-  { key: 'name', label: 'Họ và tên', type: 'text', required: true },
-  { key: 'address', label: 'Địa chỉ', type: 'text' },
-  { key: 'attendees', label: 'Số lượng đi', type: 'number', required: true },
-  { key: 'expectedGift', label: 'Tiền mừng dự kiến (VNĐ)', type: 'number' },
-  { key: 'actualGift', label: 'Tiền mừng thực tế (VNĐ)', type: 'number' },
-  { key: 'note', label: 'Ghi chú', type: 'textarea' },
+  { key: 'name', label: 'Họ và tên', type: 'text', required: true, placeholder: 'VD: V/C Anh chị Minh – Lan' },
+  { key: 'address', label: 'Địa chỉ', type: 'text', half: true, placeholder: 'VD: Phú Bình' },
+  { key: 'attendees', label: 'Số lượng đi', type: 'number', required: true, variant: 'stepper', half: true },
+  { key: 'expectedGift', label: 'Mừng dự kiến', type: 'number', variant: 'money', half: true },
+  { key: 'actualGift', label: 'Mừng thực tế', type: 'number', variant: 'money', half: true },
+  { key: 'note', label: 'Ghi chú', type: 'textarea', placeholder: 'VD: Kiểm tra lại tên…' },
 ]
 
 const needsCheck = (g: Guest) => (g.note ?? '').trim().toLowerCase().startsWith('kiểm tra')
@@ -62,26 +62,26 @@ export function GuestsPage({ side }: { side: GuestSide }) {
     }
   }
 
-  const title = side === 'TRAI' ? 'NHÀ TRAI' : 'NHÀ GÁI'
+  const title = side === 'TRAI' ? 'Nhà Trai' : 'Nhà Gái'
 
   return (
     <div>
       <PageTitle
         right={desktop ? <Btn onClick={() => newRowRef.current?.focus()}>+ Thêm khách</Btn> : undefined}
       >
-        DANH SÁCH KHÁCH MỜI {title}
+        Khách mời {title}
       </PageTitle>
 
       <div className="mb-3 flex flex-wrap gap-2">
         <input
-          className="min-w-0 flex-1 basis-48 rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none focus:border-wine"
-          placeholder="🔍 Tìm theo tên hoặc địa chỉ…"
+          className="field !h-11 min-w-0 flex-1 basis-full !bg-white sm:basis-48"
+          placeholder="Tìm theo tên hoặc địa chỉ…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           type="search"
         />
         <select
-          className="min-w-0 flex-1 basis-36 rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none focus:border-wine sm:flex-none"
+          className="field !h-11 min-w-0 flex-1 basis-36 !bg-white sm:flex-none sm:!w-56"
           value={addr}
           onChange={(e) => setAddr(e.target.value)}
         >
@@ -95,7 +95,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
         {checkCount > 0 && (
           <button
             onClick={() => setOnlyCheck((v) => !v)}
-            className={`rounded-lg border px-3 py-2 text-sm whitespace-nowrap ${
+            className={`h-11 rounded-full border-[1.5px] px-4 text-[13px] font-medium whitespace-nowrap ${
               onlyCheck ? 'border-[#ED7D31] bg-[#ED7D31] text-white' : 'border-[#ED7D31] bg-white text-[#C55A11]'
             }`}
           >
@@ -131,7 +131,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
 
       <SortableList ids={shown.map((g) => g.id)} disabled={filtering} onMove={(a, o) => reorderGuest(side, a, o)}>
         {desktop ? (
-          <div className="max-h-[calc(100dvh-270px)] min-h-64 overflow-auto rounded-lg">
+          <div className="max-h-[calc(100dvh-290px)] min-h-64 overflow-auto rounded-xl shadow-sm">
             <table className="tbl">
               <thead>
                 <tr>
@@ -188,7 +188,8 @@ export function GuestsPage({ side }: { side: GuestSide }) {
 
       {sheet && (
         <EditSheet
-          title={sheet === 'new' ? 'Thêm khách' : `Sửa khách #${stt.get(sheet.id)}`}
+          title={sheet === 'new' ? 'Thêm khách mời' : 'Sửa khách mời'}
+          subtitle={`${side === 'TRAI' ? 'Nhà Trai' : 'Nhà Gái'}${sheet === 'new' ? '' : ` · STT ${stt.get(sheet.id)}`}`}
           fields={FIELDS}
           initial={sheet === 'new' ? { attendees: 1 } : (sheet as unknown as Values)}
           onClose={() => setSheet(null)}
@@ -248,7 +249,7 @@ function GuestCard({ g, stt, onOpen }: { g: Guest; stt: number; onOpen: () => vo
     <div
       ref={ref}
       style={{ ...style, borderLeft: check ? '4px solid #ED7D31' : undefined }}
-      className="flex items-start gap-2 rounded-xl border border-gray-200 bg-white p-2.5 active:bg-gray-50"
+      className="flex items-start gap-2 rounded-2xl border border-[#efe5e9] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition active:scale-[.99]"
       onClick={onOpen}
     >
       <div className="flex flex-col items-center">
@@ -257,14 +258,19 @@ function GuestCard({ g, stt, onOpen }: { g: Guest; stt: number; onOpen: () => vo
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <div className="font-bold leading-snug">{g.name}</div>
+          <div className="leading-snug font-semibold text-[#2b2326]">{g.name}</div>
           <span
-            className={`num shrink-0 rounded-full px-2 py-0.5 text-sm ${g.attendees === 0 ? 'bg-gray-100 text-gray-400' : 'bg-rose text-wine'}`}
+            className={`num shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${g.attendees === 0 ? 'bg-gray-100 text-gray-400' : 'bg-[#fbe9ee] text-wine'}`}
           >
             {g.attendees} người
           </span>
         </div>
-        {g.address && <div className="text-sm text-gray-500">📍 {g.address}</div>}
+        {g.address && (
+          <div className="mt-0.5 flex items-center gap-1 text-[13px] text-gray-500">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+            {g.address}
+          </div>
+        )}
         {(g.expectedGift || g.actualGift) && (
           <div className="mt-0.5 flex gap-3 text-sm">
             {g.expectedGift ? <span className="text-gray-600">Dự kiến: <b className="num">{fmtMoney(g.expectedGift)}</b></span> : null}

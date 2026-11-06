@@ -80,7 +80,7 @@ export function DataPage() {
 
   return (
     <div className="max-w-2xl">
-      <PageTitle>DỮ LIỆU</PageTitle>
+      <PageTitle>Dữ liệu</PageTitle>
       <p className="mb-4 text-sm text-gray-500">Lần lưu gần nhất: {fmtDateTime(data.updatedAt)}</p>
 
       <div className="space-y-3">
@@ -103,7 +103,7 @@ export function DataPage() {
               e.target.value = ''
             }}
           />
-          {importErr && <pre className="mt-3 rounded-lg bg-red-50 p-3 text-sm whitespace-pre-wrap text-red-700">{importErr}</pre>}
+          {importErr && <pre className="mt-3 rounded-2xl bg-red-50 font-sans p-3 text-sm whitespace-pre-wrap text-red-700">{importErr}</pre>}
         </Card>
 
         <Card title="Khôi phục dữ liệu gốc" desc="Xóa dữ liệu hiện tại và nạp lại từ seed-data.json.">
@@ -133,9 +133,9 @@ export function DataPage() {
 
 function Card({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4" style={{ borderLeft: '4px solid #7F6000' }}>
-      <h2 className="font-bold">{title}</h2>
-      <p className="mt-0.5 mb-3 text-sm text-gray-500">{desc}</p>
+    <div className="rounded-3xl border border-[#efe5e9] bg-white p-5 shadow-[0_1px_3px_rgba(80,30,45,.06)]">
+      <h2 className="font-semibold text-[#2b2326]">{title}</h2>
+      <p className="mt-0.5 mb-4 text-[13px] text-gray-500">{desc}</p>
       {children}
     </div>
   )
