@@ -18,8 +18,8 @@ export type FieldDef =
 
 export type Values = Record<string, string | number | boolean | null>
 
-/** Form dạng "bottom sheet" cho điện thoại (modal giữa màn hình trên desktop). */
-export function EditSheet({
+/** Hộp thoại thêm / sửa, luôn nằm giữa màn hình. */
+export function EditDialog({
   title,
   subtitle,
   fields,
@@ -155,12 +155,13 @@ export function EditSheet({
           </div>
         )
       } else {
-        const suffix = f.suffix ?? (f.variant === 'money' ? 'VNĐ' : undefined)
+        const suffix = f.suffix
         control = (
           <div className="relative">
             <input
               className={`${cls} num ${f.variant === 'money' ? 'money' : ''} ${suffix ? 'pr-14' : ''} text-right`}
               inputMode="numeric"
+              autoComplete="off"
               value={disabled ? '' : raw}
               placeholder={disabled ? 'Tự tính' : (f.placeholder ?? '0')}
               disabled={disabled}
@@ -182,6 +183,7 @@ export function EditSheet({
             value={String(vals[f.key])}
             onChange={(e) => set(f.key, e.target.value)}
             placeholder={f.placeholder}
+            autoComplete="off"
             autoFocus={f.key === 'name' && !initial.name}
           />
         </div>
@@ -192,6 +194,7 @@ export function EditSheet({
       <label key={f.key} className={`block min-w-0 ${f.half ? '' : 'col-span-2'}`}>
         <span className="mb-1.5 block text-[13px] font-medium text-gray-600">
           {f.label}
+          {f.type === 'number' && f.variant === 'money' && <span className="font-normal text-gray-400"> (VNĐ)</span>}
           {'required' in f && f.required && <span className="text-wine"> *</span>}
         </span>
         {control}
@@ -208,21 +211,22 @@ export function EditSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#2b1a20]/45 backdrop-blur-[2px] md:items-center" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#2b1a20]/45 p-4 backdrop-blur-[2px]"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
       <form
-        className="anim-sheet flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl md:max-w-lg md:rounded-3xl"
+        className="anim-dialog flex max-h-[calc(100dvh-32px)] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault()
           submit()
         }}
       >
-        {/* thanh kéo (trang trí) trên điện thoại */}
-        <div className="flex justify-center pt-2.5 md:hidden">
-          <span className="h-1.5 w-10 rounded-full bg-gray-200" />
-        </div>
-
-        <div className="flex items-start justify-between gap-3 px-5 pt-3 pb-2 md:pt-5">
+        <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-2">
           <div className="min-w-0">
             <h2 className="font-display text-[22px] leading-tight font-bold text-wine">{title}</h2>
             {subtitle && <p className="mt-0.5 truncate text-[13px] text-gray-500">{subtitle}</p>}
@@ -244,7 +248,7 @@ export function EditSheet({
           {extra && <div className="col-span-2">{extra(live)}</div>}
         </div>
 
-        <div className="safe-bottom flex items-center gap-2 border-t border-gray-100 bg-white px-5 py-3">
+        <div className="flex items-center gap-2 border-t border-gray-100 bg-white px-5 py-3">
           {onDelete && (
             <button
               type="button"

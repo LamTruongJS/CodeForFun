@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { Btn, DeleteBtn, Empty, Fab, PageTitle, TotalsBar, useIsDesktop } from '../components/Common'
-import { EditSheet, type FieldDef, type Values } from '../components/EditSheet'
+import { EditDialog, type FieldDef, type Values } from '../components/EditDialog'
 import { ChipSelect, InlineNumber, InlineText, SIDE_OPTIONS, STATUS_OPTIONS } from '../components/Inline'
 import { SortableList, useSortRow } from '../components/Sortable'
 import { bySortOrder, taskRemaining, taskTotals } from '../lib/calc'
@@ -163,7 +163,7 @@ export function TasksPage() {
       {!desktop && <Fab label="Thêm việc" onClick={() => setSheet('new')} />}
 
       {sheet && (
-        <EditSheet
+        <EditDialog
           title={sheet === 'new' ? 'Thêm công việc' : 'Sửa công việc'}
           subtitle={sheet === 'new' ? undefined : `STT ${stt.get(sheet.id)}`}
           fields={FIELDS}

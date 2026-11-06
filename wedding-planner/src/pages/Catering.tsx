@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { DeleteBtn, PageTitle, useIsDesktop } from '../components/Common'
-import { EditSheet, type FieldDef } from '../components/EditSheet'
+import { EditDialog, type FieldDef } from '../components/EditDialog'
 import { InlineNumber, InlineText } from '../components/Inline'
 import { SortableList, useSortRow } from '../components/Sortable'
 import { cateringForSide } from '../lib/calc'
@@ -120,7 +120,7 @@ function Section({ side }: { side: GuestSide }) {
       </div>
 
       {sheet && (
-        <EditSheet
+        <EditDialog
           title={sheet === 'new' ? `Thêm hạng mục ${label}` : 'Sửa hạng mục'}
           fields={FIELDS}
           initial={

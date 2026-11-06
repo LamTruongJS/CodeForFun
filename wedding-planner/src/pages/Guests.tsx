@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { Btn, DeleteBtn, Empty, Fab, PageTitle, TotalsBar, useIsDesktop } from '../components/Common'
-import { EditSheet, type FieldDef, type Values } from '../components/EditSheet'
+import { EditDialog, type FieldDef, type Values } from '../components/EditDialog'
 import { InlineNumber, InlineText } from '../components/Inline'
 import { SortableList, useSortRow } from '../components/Sortable'
 import { bySortOrder, guestTotals } from '../lib/calc'
@@ -187,7 +187,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
       {!desktop && <Fab label="Thêm khách" onClick={() => setSheet('new')} />}
 
       {sheet && (
-        <EditSheet
+        <EditDialog
           title={sheet === 'new' ? 'Thêm khách mời' : 'Sửa khách mời'}
           subtitle={`${side === 'TRAI' ? 'Nhà Trai' : 'Nhà Gái'}${sheet === 'new' ? '' : ` · STT ${stt.get(sheet.id)}`}`}
           fields={FIELDS}
