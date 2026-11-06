@@ -1,0 +1,1032 @@
+{
+  "cateringSettings": [
+    {
+      "side": "TRAI",
+      "peoplePerTable": 10
+    },
+    {
+      "side": "GAI",
+      "peoplePerTable": 10
+    }
+  ],
+  "cateringItems": [
+    {
+      "side": "TRAI",
+      "sortOrder": 1,
+      "name": "Thức ăn",
+      "unit": "Bàn",
+      "unitPrice": 2200000,
+      "quantityMode": "AUTO_TABLES",
+      "quantity": null
+    },
+    {
+      "side": "TRAI",
+      "sortOrder": 2,
+      "name": "Bia",
+      "unit": "Thùng",
+      "unitPrice": null,
+      "quantityMode": "MANUAL",
+      "quantity": null
+    },
+    {
+      "side": "TRAI",
+      "sortOrder": 3,
+      "name": "Nước ngọt",
+      "unit": "Thùng",
+      "unitPrice": null,
+      "quantityMode": "MANUAL",
+      "quantity": null
+    },
+    {
+      "side": "TRAI",
+      "sortOrder": 4,
+      "name": "Nước lọc",
+      "unit": "Thùng",
+      "unitPrice": null,
+      "quantityMode": "MANUAL",
+      "quantity": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 1,
+      "name": "Thức ăn",
+      "unit": "Bàn",
+      "unitPrice": null,
+      "quantityMode": "AUTO_TABLES",
+      "quantity": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 2,
+      "name": "Bia",
+      "unit": "Thùng",
+      "unitPrice": null,
+      "quantityMode": "MANUAL",
+      "quantity": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 3,
+      "name": "Nước ngọt",
+      "unit": "Thùng",
+      "unitPrice": null,
+      "quantityMode": "MANUAL",
+      "quantity": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 4,
+      "name": "Nước lọc",
+      "unit": "Thùng",
+      "unitPrice": null,
+      "quantityMode": "MANUAL",
+      "quantity": null
+    }
+  ],
+  "guests": [
+    {
+      "side": "GAI",
+      "sortOrder": 1,
+      "name": "V/C Anh chị Tình – Hạnh",
+      "address": "Phú Ninh",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 2,
+      "name": "V/C Em Hiền – Thủy",
+      "address": "Phú Ninh",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 3,
+      "name": "V/C Em Hoàn – Bình",
+      "address": "Phú Ninh",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 4,
+      "name": "V/C Em Toàn – Tuyết",
+      "address": "Phú Ninh",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 5,
+      "name": "V/C Em Phương – Luận",
+      "address": "Phú Hiệp",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 6,
+      "name": "V/C Em Mỹ – Sơn",
+      "address": "Phú Nghĩa",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 7,
+      "name": "Chị Bê (Trung)",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 8,
+      "name": "Chị Phương",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 9,
+      "name": "V/C Anh chị Minh – Lan",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên và địa chỉ"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 10,
+      "name": "V/C Anh chị Hùng – Dung",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 11,
+      "name": "V/C Anh chị Tuấn – Loan",
+      "address": "Phú Hiệp",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 12,
+      "name": "V/C Em Hà – Thảo",
+      "address": "VT1",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 13,
+      "name": "V/C Bạn Chiến – Lâm",
+      "address": "VT1",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 14,
+      "name": "V/C Chị Hường",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 15,
+      "name": "Chị Lân",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 16,
+      "name": "V/C Anh Cai Lâm – Sen",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 17,
+      "name": "Chị Quyền",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 18,
+      "name": "V/C Anh chị Trung – Hạnh",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 19,
+      "name": "Anh Tòng",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 20,
+      "name": "V/C Bạn Liên – Phương",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 21,
+      "name": "V/C Em Quý – Nhung",
+      "address": "Phú Phong",
+      "attendees": 2,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 22,
+      "name": "Chị Hương",
+      "address": "Phú Hiệp",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên (có chữ nhỏ phía trên)"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 23,
+      "name": "V/C cháu Phong – Ngọc",
+      "address": "Phú Hiệp",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 24,
+      "name": "V/C Cháu Linh – Quí",
+      "address": "Dốc Ngói",
+      "attendees": 2,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên và địa chỉ"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 25,
+      "name": "V/C Cháu Lan – Cảnh",
+      "address": "Phú Hiệp",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 26,
+      "name": "V/C Anh chị Ngọc – Lực",
+      "address": "Vinh Trang",
+      "attendees": 2,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 27,
+      "name": "V/C Cháu Chi – Bách",
+      "address": "Vinh Trang",
+      "attendees": 2,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 28,
+      "name": "V/C Cháu Nguyên – Phượng",
+      "address": "Vinh Trang",
+      "attendees": 2,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 29,
+      "name": "V/C Cháu My – Anh",
+      "address": "Sài Gòn",
+      "attendees": 0,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 30,
+      "name": "V/C Anh chị Phú – Tịnh",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 31,
+      "name": "V/C Cháu Quyền – Phụng",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 32,
+      "name": "V/C Cháu Cường – Linh",
+      "address": "Nha Trang",
+      "attendees": 0,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại số lượng (số bị khoanh tròn)"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 33,
+      "name": "V/C Cháu Nhung – Khẫn",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 34,
+      "name": "V/C Em Hạnh – Lộc",
+      "address": "Phú Phong",
+      "attendees": 2,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 35,
+      "name": "V/C Cháu Như – Long",
+      "address": "Sài Gòn",
+      "attendees": 0,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 36,
+      "name": "V/C Cháu Đức - Hạnh",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 37,
+      "name": "V/C Em Hiền – Bình",
+      "address": "Vĩnh Thái",
+      "attendees": 2,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 38,
+      "name": "V/C Em Lạc – Yến",
+      "address": "Vĩnh Thái",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 39,
+      "name": "Chị Lành",
+      "address": "Phú Nghĩa",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 40,
+      "name": "Chị Dung",
+      "address": "Phú Nghĩa",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 41,
+      "name": "Chị Dung",
+      "address": "Phú Ninh",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra trùng với dòng trên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 42,
+      "name": "V/C Chị Linh – Lâm",
+      "address": "Phú Ninh",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 43,
+      "name": "Anh chị Xui gia Bình – Thủy",
+      "address": "Huế",
+      "attendees": 0,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Không ghi địa chỉ"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 44,
+      "name": "Vú Huệ – Thành",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 45,
+      "name": "V/C Em Triều – Minh",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 46,
+      "name": "V/C Cháu Hậu – Ninh",
+      "address": "Phú Vinh",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 47,
+      "name": "Cháu Huệ",
+      "address": "Phú Nghĩa",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 48,
+      "name": "V/C Em Ân",
+      "address": "Phú Hòa",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 49,
+      "name": "V/C Em Long – Hồng",
+      "address": "Phú Hòa",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 50,
+      "name": "V/C Anh chị Hùng – Hải",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 51,
+      "name": "Chị Huệ",
+      "address": "Phú Hòa",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 52,
+      "name": "V/C Bạn Hữu – Thu",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 53,
+      "name": "V/C Anh chị Thảo – Huệ",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 54,
+      "name": "V/C Bạn Hùng – Tuyết",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 55,
+      "name": "Vú Bọ Vân – Tâm",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 56,
+      "name": "Vú Hoa",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 57,
+      "name": "Vú Tiến",
+      "address": "Khánh Sơn",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 58,
+      "name": "Anh chị Xui gia Nghĩa – Loan",
+      "address": "Ba Ngòi",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 59,
+      "name": "V/C Cháu Truyền – Hà",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 60,
+      "name": "V/C Cháu Tuấn – Nguyệt",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 61,
+      "name": "V/C Cháu Nga – Khẫn",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 62,
+      "name": "V/C Em Yến – Giang",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 63,
+      "name": "V/C Bạn Hạnh – Hùng",
+      "address": "VT1",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 64,
+      "name": "V/C Em Hoài – Trang",
+      "address": "VT1",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 65,
+      "name": "V/C Bạn Phương – Huyền",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 66,
+      "name": "V/C Cháu Dũng",
+      "address": "Phú Nghĩa",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 67,
+      "name": "V/C Cháu Hùng – Trang",
+      "address": "Phú Ân",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại địa chỉ"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 68,
+      "name": "V/C Anh Bình – Hòa",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 69,
+      "name": "V/C Cháu Minh – Ánh",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 70,
+      "name": "V/C Cháu Hùng – Nhi",
+      "address": "Phú Phong",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 71,
+      "name": "V/C Bạn Hùng – Hằng",
+      "address": "Vĩnh Thái",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 72,
+      "name": "V/C Hai em Đức – Dung",
+      "address": "Phú Trung",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 73,
+      "name": "V/C Cháu Hiển – Bích",
+      "address": "Phú Bình",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 74,
+      "name": "V/C Tâm – Phước",
+      "address": "Phú Thuận",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": null
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 75,
+      "name": "V/C Quí – Quyên (Em Nhơn)",
+      "address": "Sài Gòn",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 76,
+      "name": "V/C Hương – Bảo",
+      "address": "Phú Thuận",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên và số lượng"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 77,
+      "name": "V/C Chính – Quang",
+      "address": "Phú Thuận",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    },
+    {
+      "side": "GAI",
+      "sortOrder": 78,
+      "name": "V/C Phi – Cúc",
+      "address": "Phú Thuận",
+      "attendees": 1,
+      "expectedGift": null,
+      "actualGift": null,
+      "note": "Kiểm tra lại tên"
+    }
+  ],
+  "tasks": [
+    {
+      "sortOrder": 1,
+      "name": "Chụp ảnh cưới",
+      "amount": 3000000,
+      "deposit": 500000,
+      "side": "CHUNG",
+      "status": "DANG_LAM",
+      "note": null
+    },
+    {
+      "sortOrder": 2,
+      "name": "Thuê váy cưới, vest",
+      "amount": 3800000,
+      "deposit": null,
+      "side": "CHUNG",
+      "status": "DANG_LAM",
+      "note": null
+    },
+    {
+      "sortOrder": 3,
+      "name": "Mua nhẫn cưới",
+      "amount": 7000000,
+      "deposit": 7000000,
+      "side": "CHUNG",
+      "status": "DA_LAM",
+      "note": null
+    },
+    {
+      "sortOrder": 4,
+      "name": "In thiệp cưới",
+      "amount": null,
+      "deposit": null,
+      "side": null,
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 5,
+      "name": "Nấu cưới + gia tiên nhà trai",
+      "amount": 10000000,
+      "deposit": 10000000,
+      "side": "TRAI",
+      "status": "DA_LAM",
+      "note": null
+    },
+    {
+      "sortOrder": 6,
+      "name": "Thuê chụp ảnh ngày cưới",
+      "amount": 8100000,
+      "deposit": 1000000,
+      "side": "CHUNG",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 7,
+      "name": "Trang điểm cô dâu",
+      "amount": 3300000,
+      "deposit": 500000,
+      "side": "GAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 8,
+      "name": "Tiền lễ nhà thờ",
+      "amount": null,
+      "deposit": null,
+      "side": "GAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 9,
+      "name": "Thuê xe dịch vụ 16 chỗ nhà trai",
+      "amount": 1400000,
+      "deposit": null,
+      "side": "TRAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 10,
+      "name": "Thuê xe dịch vụ 16 chỗ nhà gái",
+      "amount": 1600000,
+      "deposit": null,
+      "side": "GAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 11,
+      "name": "Thuê sân cưới nhà họ trai",
+      "amount": null,
+      "deposit": null,
+      "side": "TRAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 12,
+      "name": "Mâm quả ngày cưới",
+      "amount": null,
+      "deposit": null,
+      "side": "TRAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 13,
+      "name": "Thuê đội bưng quả nhà trai",
+      "amount": null,
+      "deposit": null,
+      "side": "TRAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 14,
+      "name": "Thuê đội bưng quả nhà gái",
+      "amount": null,
+      "deposit": null,
+      "side": "GAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 15,
+      "name": "Tiền makeup, áo dài ba mẹ họ trai",
+      "amount": null,
+      "deposit": null,
+      "side": "TRAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 16,
+      "name": "Thuê nấu cưới họ gái + gia tiên",
+      "amount": null,
+      "deposit": null,
+      "side": "GAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 17,
+      "name": "Thuê xe rước dâu",
+      "amount": null,
+      "deposit": null,
+      "side": "TRAI",
+      "status": null,
+      "note": null
+    },
+    {
+      "sortOrder": 18,
+      "name": "Hoa cưới của cô dâu",
+      "amount": null,
+      "deposit": null,
+      "side": "GAI",
+      "status": null,
+      "note": "chị Hà tặng"
+    }
+  ]
+}

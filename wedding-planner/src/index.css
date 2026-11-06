@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-serif: 'Times New Roman', Times, serif;
+  --color-wine: #8e2c48;
+  --color-blush: #f8e5ea;
+  --color-rose: #f3d3dc;
+  --color-line: #9e9e9e;
+  --color-input: #fff2cc;
+  --color-calc: #eeeeee;
+}
+
+html,
+body {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  background: #fbf7f8;
+  color: #222;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- Bảng ---------- */
+.tbl {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 16px;
+}
+.tbl th,
+.tbl td {
+  border-right: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  padding: 0;
+  background: #fff;
+  vertical-align: middle;
+}
+.tbl tr > :first-child {
+  border-left: 1px solid var(--color-line);
+}
+.tbl thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--color-wine);
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 6px;
+  text-align: center;
+  border-top: 1px solid var(--color-line);
+  white-space: nowrap;
+}
+.tbl td.pad {
+  padding: 6px 8px;
+}
+.tbl .sticky-l {
+  position: sticky;
+  z-index: 2;
+}
+.tbl thead th.sticky-l {
+  z-index: 4;
+}
+.tbl tr.done td {
+  background: #d9ead3;
+}
+.tbl tr.check > td:first-child {
+  box-shadow: inset 4px 0 0 #ed7d31;
+}
+.tbl td.calc {
+  background: var(--color-calc);
+  color: #555;
+}
+.tbl tr.done td.calc {
+  background: #cfe0c8;
+}
+.tbl td.yellow {
+  background: var(--color-input);
+}
+.tbl tfoot td,
+.tbl tr.total td {
+  background: var(--color-blush);
+  font-weight: 700;
+  padding: 6px 8px;
+}
+
+/* Ô nhập trong bảng */
+.cell {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  padding: 6px 8px;
+  outline: none;
+  font: inherit;
+  border-radius: 0;
+}
+.cell:focus {
+  background: #fff;
+  box-shadow: inset 0 0 0 2px #8e2c48;
+}
+.cell.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.cell.err {
+  box-shadow: inset 0 0 0 2px #dc2626;
+  background: #fee2e2;
+}
+
+/* Chip dropdown */
+.chip {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 9999px;
+  padding: 2px 12px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  cursor: pointer;
+  field-sizing: content;
+  max-width: 100%;
+  border: 1px solid transparent;
+  outline: none;
+}
+.chip:focus-visible {
+  box-shadow: 0 0 0 2px #8e2c48;
+}
+.chip.empty {
+  background: #fff;
+  border: 1px dashed #bbb;
+  color: #999;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.anim-sheet {
+  animation: sheet-up 0.18s ease-out;
+}
