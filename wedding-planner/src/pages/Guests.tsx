@@ -13,7 +13,7 @@ import { useAppStore } from '../store/useAppStore'
 const FIELDS: FieldDef[] = [
   { key: 'name', label: 'Họ và tên', type: 'text', required: true, placeholder: 'VD: V/C Anh chị Minh – Lan' },
   { key: 'address', label: 'Địa chỉ', type: 'text', half: true, placeholder: 'VD: Phú Bình' },
-  { key: 'attendees', label: 'Số lượng đi', type: 'number', required: true, variant: 'stepper', half: true },
+  { key: 'attendees', label: 'Số lượng dự kiến đi', type: 'number', required: true, variant: 'stepper', half: true },
   { key: 'expectedGift', label: 'Mừng dự kiến', type: 'number', variant: 'money', half: true },
   { key: 'actualGift', label: 'Mừng thực tế', type: 'number', variant: 'money', half: true },
   { key: 'note', label: 'Ghi chú', type: 'textarea', placeholder: 'VD: Kiểm tra lại tên…' },
@@ -104,8 +104,8 @@ export function GuestsPage({ side }: { side: GuestSide }) {
 
       <TotalsBar
         items={[
-          { label: 'Lượt mời', value: `${totals.count}` },
-          { label: 'Số lượng đi', value: fmtInt(totals.attendees) },
+          { label: 'Số thiệp mời', value: `${totals.count}` },
+          { label: 'Số lượng khách dự kiến đi', value: fmtInt(totals.attendees) },
           { label: 'Mừng dự kiến', value: fmtMoney(totals.expected) },
           { label: 'Mừng thực tế', value: fmtMoney(totals.actual) },
         ]}
@@ -136,7 +136,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
                   <th className="sticky-l left-0 w-[68px] min-w-[68px]">STT</th>
                   <th className="sticky-l left-[68px] min-w-[220px] text-left">Họ và tên</th>
                   <th className="min-w-[130px]">Địa chỉ</th>
-                  <th className="w-24">Số lượng đi</th>
+                  <th className="w-28">Dự kiến đi</th>
                   <th className="min-w-[150px]">Tiền mừng dự kiến (VNĐ)</th>
                   <th className="min-w-[150px]">Tiền mừng thực tế (VNĐ)</th>
                   <th className="min-w-[200px]">Ghi chú</th>
@@ -166,7 +166,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
                     />
                   </td>
                   <td colSpan={6} className="pad text-sm text-gray-400">
-                    Số lượng đi mặc định là 1
+                    Số lượng dự kiến đi mặc định là 1
                   </td>
                 </tr>
               </tbody>

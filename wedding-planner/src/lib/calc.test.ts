@@ -49,7 +49,7 @@ const task = (p: Partial<Task>): Task => ({
 describe('dữ liệu seed (mục 10)', () => {
   const d = load()
   it('Nhà Trai 0 khách', () => expect(guestTotals(d.guests, 'TRAI').count).toBe(0))
-  it('Nhà Gái 78 lượt mời, 81 người đi, 9 bàn', () => {
+  it('Nhà Gái 78 thiệp mời, 81 người đi, 9 bàn', () => {
     const g = guestTotals(d.guests, 'GAI')
     expect(g.count).toBe(78)
     expect(g.attendees).toBe(81)

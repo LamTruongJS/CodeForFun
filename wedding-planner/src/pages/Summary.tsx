@@ -90,8 +90,8 @@ export function SummaryPage() {
       )}
 
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <QuickLink to="/guests/trai" color="#2E75B6" title="Khách Nhà Trai" value={`${rows[0].TRAI} lượt mời`} />
-        <QuickLink to="/guests/gai" color="#C0504D" title="Khách Nhà Gái" value={`${rows[0].GAI} lượt mời`} />
+        <QuickLink to="/guests/trai" color="#2E75B6" title="Khách Nhà Trai" value={`${rows[0].TRAI} thiệp mời`} />
+        <QuickLink to="/guests/gai" color="#C0504D" title="Khách Nhà Gái" value={`${rows[0].GAI} thiệp mời`} />
         <QuickLink to="/catering" color="#70AD47" title="Số bàn" value={`${rows[5].total} bàn`} />
         <QuickLink to="/tasks" color="#ED7D31" title="Công việc" value={`${done}/${data.tasks.length} đã làm`} />
       </div>

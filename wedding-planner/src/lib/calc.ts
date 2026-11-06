@@ -96,8 +96,8 @@ export function summary(data: AppData): SummaryRow[] {
   }
   const cost = (s: GuestSide) => c[s].total + t[s]
   return [
-    row(1, 'Số lượt mời', (s) => g[s].count, 'count'),
-    row(2, 'Số lượng khách đi', (s) => g[s].attendees, 'count'),
+    row(1, 'Số thiệp mời', (s) => g[s].count, 'count'),
+    row(2, 'Số lượng khách dự kiến đi', (s) => g[s].attendees, 'count'),
     row(3, 'Tiền mừng dự kiến (VNĐ)', (s) => g[s].expected, 'money'),
     row(4, 'Tiền mừng thực tế (VNĐ)', (s) => g[s].actual, 'money'),
     row(5, 'Chênh lệch thực tế so với dự kiến (VNĐ)', (s) => g[s].actual - g[s].expected, 'money', {
