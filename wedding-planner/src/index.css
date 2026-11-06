@@ -225,3 +225,23 @@ textarea.field {
 .font-display {
   font-family: var(--font-display);
 }
+
+/* Dropdown tự vẽ */
+.field.is-open {
+  background: #fff;
+  border-color: #8e2c48;
+  box-shadow: 0 0 0 4px rgba(142, 44, 72, 0.1);
+}
+@keyframes pop-in {
+  from {
+    transform: translateY(-4px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.anim-pop {
+  animation: pop-in 0.12s ease-out;
+}

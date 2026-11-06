@@ -1,5 +1,6 @@
 import { useSyncExternalStore, type ReactNode } from 'react'
 import { useConfirmStore, useToast } from '../store/ui'
+import { MODAL_PANEL, Modal } from './Modal'
 
 const mq = typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)') : null
 /** true khi màn hình ≥ 768px (hiển thị bảng), false trên điện thoại (hiển thị thẻ). */
@@ -109,8 +110,8 @@ export function ConfirmHost() {
   const req = useConfirmStore((s) => s.req)
   if (!req) return null
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#2b1a20]/45 p-5 backdrop-blur-[2px]" onClick={() => req.resolve(false)}>
-      <div className="anim-sheet w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <Modal label={req.title} onClose={() => req.resolve(false)} z={70}>
+      <div className={`${MODAL_PANEL} max-w-sm p-6`}>
         <h2 className="font-display text-xl font-bold text-[#2b2326]">{req.title}</h2>
         {req.message && <p className="mt-2 text-[14px] whitespace-pre-line text-gray-600">{req.message}</p>}
         <div className="mt-6 grid grid-cols-2 gap-2">
@@ -126,7 +127,7 @@ export function ConfirmHost() {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 

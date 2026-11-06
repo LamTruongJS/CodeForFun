@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Btn, DeleteBtn, Empty, Fab, PageTitle, TotalsBar, useIsDesktop } from '../components/Common'
 import { EditDialog, type FieldDef, type Values } from '../components/EditDialog'
 import { InlineNumber, InlineText } from '../components/Inline'
+import { Select } from '../components/Select'
 import { SortableList, useSortRow } from '../components/Sortable'
 import { bySortOrder, guestTotals } from '../lib/calc'
 import { fmtInt, fmtMoney } from '../lib/format'
@@ -80,18 +81,15 @@ export function GuestsPage({ side }: { side: GuestSide }) {
           onChange={(e) => setQ(e.target.value)}
           type="search"
         />
-        <select
-          className="field !h-11 min-w-0 flex-1 basis-36 !bg-white sm:flex-none sm:!w-56"
-          value={addr}
-          onChange={(e) => setAddr(e.target.value)}
-        >
-          <option value="">Tất cả địa chỉ</option>
-          {addresses.map(([a, c]) => (
-            <option key={a} value={a}>
-              {a} ({c})
-            </option>
-          ))}
-        </select>
+        <Select
+          className="!h-11 min-w-0 flex-1 basis-36 !bg-white sm:flex-none sm:!w-60"
+          value={addr || null}
+          onChange={(v) => setAddr(v ?? '')}
+          placeholder="Tất cả địa chỉ"
+          emptyLabel="Tất cả địa chỉ"
+          ariaLabel="Lọc theo địa chỉ"
+          options={addresses.map(([a, c]) => ({ value: a, label: a, hint: String(c) }))}
+        />
         {checkCount > 0 && (
           <button
             onClick={() => setOnlyCheck((v) => !v)}

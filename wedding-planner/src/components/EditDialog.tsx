@@ -1,5 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { fmtInput, parseIntInput } from '../lib/format'
+import { MODAL_PANEL, Modal, ModalClose } from './Modal'
+import { Select, type SelectOption } from './Select'
 
 type Base = { key: string; label: string; half?: boolean }
 export type FieldDef =
@@ -13,7 +15,7 @@ export type FieldDef =
       suffix?: string
       disabledWhen?: (v: Values) => boolean
     })
-  | (Base & { type: 'select'; options: { value: string; label: string }[]; placeholder: string })
+  | (Base & { type: 'select'; options: SelectOption[]; placeholder: string })
   | (Base & { type: 'toggle'; hint?: string })
 
 export type Values = Record<string, string | number | boolean | null>
@@ -48,16 +50,6 @@ export function EditDialog({
     return o
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-    }
-  }, [onClose])
 
   const parsed = (): { ok: boolean; out: Values; errs: Record<string, string> } => {
     const out: Values = {}
@@ -115,17 +107,15 @@ export function EditDialog({
       control = <textarea className={cls} rows={2} value={String(vals[f.key])} onChange={(e) => set(f.key, e.target.value)} placeholder={f.placeholder} />
     } else if (f.type === 'select') {
       control = (
-        <div className="relative">
-          <select className={`${cls} appearance-none pr-10`} value={String(vals[f.key])} onChange={(e) => set(f.key, e.target.value)}>
-            <option value="">{f.placeholder}</option>
-            {f.options.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <Chevron />
-        </div>
+        <Select
+          value={String(vals[f.key]) || null}
+          options={f.options}
+          placeholder={f.placeholder}
+          emptyLabel={f.placeholder}
+          ariaLabel={f.label}
+          className={err ? 'invalid' : ''}
+          onChange={(v) => set(f.key, v ?? '')}
+        />
       )
     } else if (f.type === 'number') {
       const disabled = f.disabledWhen?.(live) ?? false
@@ -211,16 +201,9 @@ export function EditDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#2b1a20]/45 p-4 backdrop-blur-[2px]"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-    >
+    <Modal label={title} onClose={onClose}>
       <form
-        className="anim-dialog flex max-h-[calc(100dvh-32px)] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+        className={`${MODAL_PANEL} max-w-lg`}
         onSubmit={(e) => {
           e.preventDefault()
           submit()
@@ -231,16 +214,7 @@ export function EditDialog({
             <h2 className="font-display text-[22px] leading-tight font-bold text-wine">{title}</h2>
             {subtitle && <p className="mt-0.5 truncate text-[13px] text-gray-500">{subtitle}</p>}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200"
-            aria-label="Đóng"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
+          <ModalClose onClick={onClose} />
         </div>
 
         <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-4 overflow-y-auto px-5 pt-2 pb-5">
@@ -272,7 +246,7 @@ export function EditDialog({
           </button>
         </div>
       </form>
-    </div>
+    </Modal>
   )
 }
 
@@ -295,22 +269,5 @@ export function Switch({ on }: { on: boolean }) {
     <span className={`relative inline-block h-7 w-12 shrink-0 rounded-full transition-colors ${on ? 'bg-[#70AD47]' : 'bg-gray-300'}`}>
       <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all ${on ? 'left-[22px]' : 'left-0.5'}`} />
     </span>
-  )
-}
-
-function Chevron() {
-  return (
-    <svg
-      className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-gray-400"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
   )
 }

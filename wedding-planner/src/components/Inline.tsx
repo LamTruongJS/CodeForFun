@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { fmtInput, parseIntInput } from '../lib/format'
 import { toast } from '../store/ui'
+import { Select } from './Select'
 
 const blurOnEnter = (e: KeyboardEvent<HTMLInputElement>) => {
   if (e.key === 'Enter') e.currentTarget.blur()
@@ -125,22 +126,26 @@ export function ChipSelect<V extends string>({
   onChange: (v: V | null) => void
   placeholder: string
 }) {
-  const cur = options.find((o) => o.value === value)
   return (
-    <select
-      className={`chip ${cur ? '' : 'empty'}`}
-      style={cur ? { background: cur.bg, color: cur.fg, fontWeight: cur.bold ? 700 : 400 } : undefined}
-      value={value ?? ''}
-      onClick={(e) => e.stopPropagation()}
-      onChange={(e) => onChange((e.target.value || null) as V | null)}
-    >
-      <option value="">{placeholder}</option>
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
+    <Select
+      value={value}
+      options={options}
+      emptyLabel="Bỏ chọn"
+      placeholder={placeholder}
+      ariaLabel={placeholder}
+      onChange={(v) => onChange(v as V | null)}
+      trigger={(cur, open) => (
+        <span
+          className={`chip inline-flex items-center gap-1 ${cur ? '' : 'empty'} ${open ? 'ring-2 ring-wine/30' : ''}`}
+          style={cur ? { background: cur.bg, color: cur.fg, fontWeight: cur.bold ? 700 : 500 } : undefined}
+        >
+          {cur ? cur.label : placeholder}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-60">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
+      )}
+    />
   )
 }
 
