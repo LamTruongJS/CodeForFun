@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Btn, DeleteBtn, Empty, Fab, PageTitle, TotalsBar, useIsDesktop } from '../components/Common'
 import { EditDialog, type FieldDef, type Values } from '../components/EditDialog'
 import { ChipSelect, InlineNumber, InlineText, SIDE_OPTIONS, STATUS_OPTIONS } from '../components/Inline'
-import { SortableList, useSortRow } from '../components/Sortable'
+import { DragHandle, DragPreview, SortableItem, SortableList } from '../components/Sortable'
 import { bySortOrder, taskRemaining, taskTotals } from '../lib/calc'
 import { fmtMoney } from '../lib/format'
 import type { Task } from '../lib/types'
@@ -95,7 +95,19 @@ export function TasksPage() {
         </div>
       )}
 
-      <SortableList ids={shown.map((t) => t.id)} disabled={filtering} onMove={reorderTask}>
+      <SortableList
+        ids={shown.map((t) => t.id)}
+        disabled={filtering}
+        onMove={reorderTask}
+        overlay={
+          desktop
+            ? undefined
+            : (id) => {
+                const t = tasks.find((x) => x.id === id)!
+                return <DragPreview stt={stt.get(id)} title={t.name} bg={t.status === 'DA_LAM' ? '#D9EAD3' : '#fff'} sub={t.amount ? `${fmtMoney(t.amount)} đ` : undefined} />
+              }
+        }
+      >
         {desktop ? (
           <div className="max-h-[calc(100dvh-320px)] min-h-64 overflow-auto rounded-xl shadow-sm">
             <table className="tbl">
@@ -226,13 +238,12 @@ function FilterRow<V extends string>({
 const remainingStyle = (v: number) => (v > 0 ? { color: '#C55A11', fontWeight: 700 } : undefined)
 
 function TaskRow({ t, stt, onPatch, onDelete }: { t: Task; stt: number; onPatch: (p: Partial<Task>) => void; onDelete: () => void }) {
-  const { ref, style, handle } = useSortRow(t.id)
   const rem = taskRemaining(t)
   return (
-    <tr ref={ref} style={style} className={t.status === 'DA_LAM' ? 'done' : ''}>
+    <SortableItem as="tr" id={t.id} className={t.status === 'DA_LAM' ? 'done' : ''}>
       <td className="sticky-l left-0">
         <div className="flex items-center gap-1 pl-1">
-          {handle}
+          <DragHandle />
           <span className="num w-7 text-center text-gray-600">{stt}</span>
         </div>
       </td>
@@ -260,23 +271,23 @@ function TaskRow({ t, stt, onPatch, onDelete }: { t: Task; stt: number; onPatch:
       <td>
         <DeleteBtn onClick={onDelete} />
       </td>
-    </tr>
+    </SortableItem>
   )
 }
 
 function TaskCard({ t, stt, onOpen, onPatch }: { t: Task; stt: number; onOpen: () => void; onPatch: (p: Partial<Task>) => void }) {
-  const { ref, style, handle } = useSortRow(t.id)
   const rem = taskRemaining(t)
   const done = t.status === 'DA_LAM'
   return (
-    <div
-      ref={ref}
-      style={{ ...style, background: done ? '#D9EAD3' : '#fff' }}
-      className="flex items-start gap-2 rounded-2xl border border-[#efe5e9] p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition active:scale-[.99]"
+    <SortableItem
+      id={t.id}
+      whole
+      style={{ background: done ? '#D9EAD3' : '#fff' }}
+      className="flex items-start gap-2 rounded-2xl border border-[#efe5e9] p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition-[scale] active:scale-[.985]"
       onClick={onOpen}
     >
       <div className="flex flex-col items-center">
-        {handle}
+        <DragHandle />
         <span className="num text-xs text-gray-400">{stt}</span>
       </div>
       <div className="min-w-0 flex-1">
@@ -307,6 +318,6 @@ function TaskCard({ t, stt, onOpen, onPatch }: { t: Task; stt: number; onOpen: (
         )}
         {t.note && <div className="mt-1 text-sm text-gray-500 italic">{t.note}</div>}
       </div>
-    </div>
+    </SortableItem>
   )
 }

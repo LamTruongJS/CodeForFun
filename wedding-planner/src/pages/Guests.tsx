@@ -3,7 +3,7 @@ import { Btn, DeleteBtn, Empty, Fab, PageTitle, TotalsBar, useIsDesktop } from '
 import { EditDialog, type FieldDef, type Values } from '../components/EditDialog'
 import { InlineNumber, InlineText } from '../components/Inline'
 import { Select } from '../components/Select'
-import { SortableList, useSortRow } from '../components/Sortable'
+import { DragHandle, DragPreview, SortableItem, SortableList } from '../components/Sortable'
 import { bySortOrder, guestTotals } from '../lib/calc'
 import { fmtInt, fmtMoney } from '../lib/format'
 import type { Guest, GuestSide } from '../lib/types'
@@ -127,7 +127,19 @@ export function GuestsPage({ side }: { side: GuestSide }) {
         </div>
       )}
 
-      <SortableList ids={shown.map((g) => g.id)} disabled={filtering} onMove={(a, o) => reorderGuest(side, a, o)}>
+      <SortableList
+        ids={shown.map((g) => g.id)}
+        disabled={filtering}
+        onMove={(a, o) => reorderGuest(side, a, o)}
+        overlay={
+          desktop
+            ? undefined
+            : (id) => {
+                const g = guests.find((x) => x.id === id)!
+                return <DragPreview stt={stt.get(id)} title={g.name} sub={[g.address, `${g.attendees} người`].filter(Boolean).join(' · ')} />
+              }
+        }
+      >
         {desktop ? (
           <div className="max-h-[calc(100dvh-290px)] min-h-64 overflow-auto rounded-xl shadow-sm">
             <table className="tbl">
@@ -206,12 +218,11 @@ export function GuestsPage({ side }: { side: GuestSide }) {
 }
 
 function GuestRow({ g, stt, onPatch, onDelete }: { g: Guest; stt: number; onPatch: (p: Partial<Guest>) => void; onDelete: () => void }) {
-  const { ref, style, handle } = useSortRow(g.id)
   return (
-    <tr ref={ref} style={style} className={needsCheck(g) ? 'check' : ''}>
+    <SortableItem as="tr" id={g.id} className={needsCheck(g) ? 'check' : ''}>
       <td className="sticky-l left-0">
         <div className="flex items-center gap-1 pl-1">
-          {handle}
+          <DragHandle />
           <span className="num w-7 text-center text-gray-600">{stt}</span>
         </div>
       </td>
@@ -236,22 +247,22 @@ function GuestRow({ g, stt, onPatch, onDelete }: { g: Guest; stt: number; onPatc
       <td>
         <DeleteBtn onClick={onDelete} />
       </td>
-    </tr>
+    </SortableItem>
   )
 }
 
 function GuestCard({ g, stt, onOpen }: { g: Guest; stt: number; onOpen: () => void }) {
-  const { ref, style, handle } = useSortRow(g.id)
   const check = needsCheck(g)
   return (
-    <div
-      ref={ref}
-      style={{ ...style, borderLeft: check ? '4px solid #ED7D31' : undefined }}
-      className="flex items-start gap-2 rounded-2xl border border-[#efe5e9] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition active:scale-[.99]"
+    <SortableItem
+      id={g.id}
+      whole
+      style={{ borderLeft: check ? '4px solid #ED7D31' : undefined }}
+      className="flex items-start gap-2 rounded-2xl border border-[#efe5e9] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition-[scale] active:scale-[.985]"
       onClick={onOpen}
     >
       <div className="flex flex-col items-center">
-        {handle}
+        <DragHandle />
         <span className="num text-xs text-gray-400">{stt}</span>
       </div>
       <div className="min-w-0 flex-1">
@@ -277,6 +288,6 @@ function GuestCard({ g, stt, onOpen }: { g: Guest; stt: number; onOpen: () => vo
         )}
         {g.note && <div className={`mt-0.5 text-sm italic ${check ? 'text-[#C55A11]' : 'text-gray-500'}`}>{g.note}</div>}
       </div>
-    </div>
+    </SortableItem>
   )
 }

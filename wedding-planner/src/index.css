@@ -124,6 +124,7 @@ body {
   font-weight: 500;
   line-height: 1.5;
   cursor: pointer;
+  white-space: nowrap;
   field-sizing: content;
   max-width: 100%;
   border: 1px solid transparent;
@@ -244,4 +245,32 @@ textarea.field {
 }
 .anim-pop {
   animation: pop-in 0.12s ease-out;
+}
+
+/* ---------- Kéo thả ---------- */
+/* Thẻ kéo được trên điện thoại: không bật menu / bôi đen chữ khi đè giữ */
+.drag-whole {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+body.is-dragging,
+body.is-dragging * {
+  cursor: grabbing !important;
+  -webkit-user-select: none;
+  user-select: none;
+}
+@keyframes lift {
+  from {
+    transform: scale(1);
+    box-shadow: 0 1px 3px rgba(80, 30, 45, 0.06);
+  }
+  to {
+    transform: scale(1.03);
+    box-shadow: 0 18px 40px -12px rgba(60, 20, 35, 0.45);
+  }
+}
+.drag-overlay {
+  animation: lift 0.16s ease-out forwards;
+  border-radius: 1rem;
 }

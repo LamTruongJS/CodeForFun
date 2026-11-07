@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import { DeleteBtn, PageTitle, useIsDesktop } from '../components/Common'
 import { EditDialog, type FieldDef } from '../components/EditDialog'
 import { InlineNumber, InlineText } from '../components/Inline'
-import { SortableList, useSortRow } from '../components/Sortable'
+import { DragHandle, DragPreview, SortableItem, SortableList } from '../components/Sortable'
 import { cateringForSide } from '../lib/calc'
 import { fmtInt, fmtMoney } from '../lib/format'
 import type { CateringItem, GuestSide } from '../lib/types'
@@ -74,7 +74,19 @@ function Section({ side }: { side: GuestSide }) {
         <Stat label="Bàn dự kiến" value={fmtInt(c.tables)} color="#3f7d20" bg="#eef7e8" icon={ICON.table} />
       </div>
 
-      <SortableList ids={c.items.map((x) => x.item.id)} onMove={(a, o) => reorderItem(side, a, o)}>
+      <SortableList
+        ids={c.items.map((x) => x.item.id)}
+        onMove={(a, o) => reorderItem(side, a, o)}
+        overlay={
+          desktop
+            ? undefined
+            : (id) => {
+                const i = c.items.findIndex((x) => x.item.id === id)
+                const x = c.items[i]
+                return <DragPreview stt={i + 1} title={x.item.name} sub={x.item.unit ?? undefined} />
+              }
+        }
+      >
         {desktop ? (
           <div className="overflow-x-auto px-3">
             <table className="tbl">
@@ -214,13 +226,12 @@ type RowProps = {
 }
 
 function ItemRow({ x, stt, onPatch, onToggle, onDelete }: RowProps & { onDelete: () => void }) {
-  const { ref, style, handle } = useSortRow(x.item.id)
   const auto = x.item.quantityMode === 'AUTO_TABLES'
   return (
-    <tr ref={ref} style={style}>
+    <SortableItem as="tr" id={x.item.id}>
       <td>
         <div className="flex items-center gap-0.5 pl-0.5">
-          {handle}
+          <DragHandle />
           <span className="num w-5 text-center text-gray-600">{stt}</span>
         </div>
       </td>
@@ -251,17 +262,16 @@ function ItemRow({ x, stt, onPatch, onToggle, onDelete }: RowProps & { onDelete:
       <td>
         <DeleteBtn onClick={onDelete} />
       </td>
-    </tr>
+    </SortableItem>
   )
 }
 
 function ItemCard({ x, stt, onPatch, onToggle, onOpen }: RowProps & { onOpen: () => void }) {
-  const { ref, style, handle } = useSortRow(x.item.id)
   const auto = x.item.quantityMode === 'AUTO_TABLES'
   return (
-    <div ref={ref} style={style} className="rounded-2xl border border-[#efe5e9] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)]">
+    <SortableItem id={x.item.id} className="rounded-2xl border border-[#efe5e9] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)]">
       <div className="flex items-center gap-2">
-        {handle}
+        <DragHandle />
         <span className="num text-xs text-gray-400">{stt}</span>
         <span className="font-semibold text-[#2b2326]">{x.item.name}</span>
         {x.item.unit && <span className="rounded-full bg-[#f3ecef] px-2 py-0.5 text-[12px] text-gray-500">{x.item.unit}</span>}
@@ -301,6 +311,6 @@ function ItemCard({ x, stt, onPatch, onToggle, onOpen }: RowProps & { onOpen: ()
           <b className={`num text-[17px] ${x.total ? 'text-wine' : 'font-medium text-[#c9bec2]'}`}>{fmtMoney(x.total)}</b>
         </span>
       </div>
-    </div>
+    </SortableItem>
   )
 }
