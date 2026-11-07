@@ -32,3 +32,27 @@ export function todayStamp() {
   const d = new Date()
   return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`
 }
+
+/** Thêm dấu chấm hàng nghìn cho chuỗi chữ số: "5000000" → "5.000.000". */
+export const groupDigits = (digits: string) => digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+
+/**
+ * Định dạng ngay khi đang gõ, giữ đúng vị trí con trỏ.
+ * - Chỉ xử lý khi chuỗi chỉ gồm chữ số / dấu chấm / khoảng trắng.
+ * - Có chữ cái hoặc dấu "-" → giữ nguyên để khi lưu vẫn báo lỗi rõ ràng.
+ * @param caret vị trí con trỏ trong chuỗi vừa gõ
+ */
+export function formatTyping(raw: string, caret: number = raw.length): { value: string; caret: number } {
+  if (!/^[\d.\s]*$/.test(raw)) return { value: raw, caret }
+  const allDigits = raw.replace(/\D/g, '')
+  let before = raw.slice(0, caret).replace(/\D/g, '').length
+  // bỏ số 0 thừa ở đầu ("007" → "7"), nhưng giữ "0"
+  const lead = allDigits.length - allDigits.replace(/^0+(?=\d)/, '').length
+  const digits = allDigits.slice(lead)
+  before = Math.max(0, before - lead)
+  const value = groupDigits(digits)
+  // đặt con trỏ ngay sau chữ số thứ `before`
+  let pos = 0
+  for (let seen = 0; pos < value.length && seen < before; pos++) if (/\d/.test(value[pos])) seen++
+  return { value, caret: pos }
+}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { fmtInput, parseIntInput } from '../lib/format'
+import { fmtInput, formatTyping, parseIntInput } from '../lib/format'
 import { toast } from '../store/ui'
 import { Select } from './Select'
 
@@ -85,12 +85,18 @@ export function InlineNumber({
       placeholder={placeholder}
       onFocus={(e) => {
         setFocused(true)
-        setDraft(value == null ? '' : String(value))
+        setDraft(fmtInput(value))
         requestAnimationFrame(() => e.target.select())
       }}
       onChange={(e) => {
-        setDraft(e.target.value)
+        // tự thêm dấu chấm hàng nghìn khi đang gõ
+        const el = e.target
+        const f = formatTyping(el.value, el.selectionStart ?? el.value.length)
+        setDraft(f.value)
         setErr(false)
+        requestAnimationFrame(() => {
+          if (document.activeElement === el) el.setSelectionRange(f.caret, f.caret)
+        })
       }}
       onKeyDown={blurOnEnter}
       onBlur={(e) => {

@@ -11,7 +11,7 @@ import {
   taskRemaining,
   taskTotals,
 } from './calc'
-import { parseIntInput } from './format'
+import { formatTyping, parseIntInput } from './format'
 import { parseImport } from './schema'
 import type { AppData, Guest, Task } from './types'
 
@@ -179,5 +179,37 @@ describe('nhập JSON (tiêu chí 13)', () => {
     const d = load()
     const r = parseImport(JSON.parse(JSON.stringify(d)))
     expect(r.ok && r.data).toEqual(d)
+  })
+})
+
+describe('formatTyping — thêm dấu chấm khi đang gõ', () => {
+  it('5000000 → 5.000.000, con trỏ ở cuối', () => {
+    expect(formatTyping('5000000')).toEqual({ value: '5.000.000', caret: 9 })
+  })
+  it('gõ thêm số vào cuối chuỗi đã có dấu chấm', () => {
+    expect(formatTyping('5.000.0000')).toEqual({ value: '50.000.000', caret: 10 })
+  })
+  it('số nhỏ không thêm dấu', () => {
+    expect(formatTyping('999').value).toBe('999')
+    expect(formatTyping('1000').value).toBe('1.000')
+  })
+  it('giữ vị trí con trỏ khi sửa ở giữa', () => {
+    // "1.000|.000" gõ thêm "5" sau chữ số thứ 4 → "10.005.000", con trỏ sau chữ số thứ 5
+    const r = formatTyping('1.0005.000', 6)
+    expect(r.value).toBe('10.005.000')
+    expect(r.value.slice(0, r.caret).replace(/\D/g, '')).toBe('10005')
+  })
+  it('xóa hết → chuỗi rỗng; bỏ số 0 thừa ở đầu', () => {
+    expect(formatTyping('').value).toBe('')
+    expect(formatTyping('0').value).toBe('0')
+    expect(formatTyping('0050000').value).toBe('50.000')
+  })
+  it('có chữ hoặc dấu âm → giữ nguyên để báo lỗi', () => {
+    expect(formatTyping('12a').value).toBe('12a')
+    expect(formatTyping('-500').value).toBe('-500')
+    expect(parseIntInput(formatTyping('-500').value).ok).toBe(false)
+  })
+  it('kết quả định dạng đọc lại đúng số', () => {
+    expect(parseIntInput(formatTyping('38200000').value)).toEqual({ ok: true, value: 38_200_000 })
   })
 })

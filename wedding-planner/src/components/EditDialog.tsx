@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { fmtInput, parseIntInput } from '../lib/format'
+import { fmtInput, formatTyping, parseIntInput } from '../lib/format'
 import { MODAL_PANEL, Modal, ModalClose } from './Modal'
 import { Select, type SelectOption } from './Select'
 
@@ -85,6 +85,14 @@ export function EditDialog({
     setVals((s) => ({ ...s, [key]: v }))
     setErrors((e) => ({ ...e, [key]: '' }))
   }
+  /** Ô số: tự thêm dấu chấm hàng nghìn khi đang gõ, giữ vị trí con trỏ. */
+  const setNumber = (key: string, el: HTMLInputElement) => {
+    const f = formatTyping(el.value, el.selectionStart ?? el.value.length)
+    set(key, f.value)
+    requestAnimationFrame(() => {
+      if (document.activeElement === el) el.setSelectionRange(f.caret, f.caret)
+    })
+  }
 
   const renderField = (f: FieldDef) => {
     const err = errors[f.key]
@@ -136,7 +144,7 @@ export function EditDialog({
               className={`${cls} num text-center text-lg font-semibold`}
               inputMode="numeric"
               value={raw}
-              onChange={(e) => set(f.key, e.target.value)}
+              onChange={(e) => setNumber(f.key, e.target)}
               onBlur={reformat}
             />
             <StepBtn label="Tăng" onClick={() => set(f.key, String(n + 1))}>
@@ -155,7 +163,7 @@ export function EditDialog({
               value={disabled ? '' : raw}
               placeholder={disabled ? 'Tự tính' : (f.placeholder ?? '0')}
               disabled={disabled}
-              onChange={(e) => set(f.key, e.target.value)}
+              onChange={(e) => setNumber(f.key, e.target)}
               onBlur={reformat}
             />
             {suffix && !disabled && (
