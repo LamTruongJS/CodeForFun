@@ -65,7 +65,7 @@ export function Layout() {
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-30 h-[56px] border-b border-[#f0e4e8] bg-white/85 backdrop-blur-md md:h-[64px]">
-        <div className="mx-auto flex h-full max-w-7xl items-center gap-3 px-4 md:px-6">
+        <div className="mx-auto flex h-full max-w-7xl items-center gap-3 px-4 md:px-6 2xl:max-w-[1600px] 2xl:px-8">
           <div className="flex items-center gap-2 whitespace-nowrap">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#b4466a] to-[#7d2640] text-white shadow-sm">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -99,7 +99,7 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 pt-4 pb-28 md:px-6 md:pt-6 md:pb-12">
+      <main className="mx-auto max-w-7xl px-4 pt-4 pb-28 md:px-6 md:pt-6 md:pb-12 2xl:max-w-[1600px] 2xl:px-8">
         <Outlet />
       </main>
 

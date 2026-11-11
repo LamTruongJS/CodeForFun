@@ -300,3 +300,13 @@ body.is-dragging * {
   animation: lift 0.16s ease-out forwards;
   border-radius: 1rem;
 }
+
+/* Màn hình lớn (≥1536px): chữ trong bảng to hơn một chút */
+@media (min-width: 1536px) {
+  .tbl {
+    font-size: 16px;
+  }
+  .tbl thead th {
+    font-size: 14px;
+  }
+}
