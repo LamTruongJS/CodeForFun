@@ -105,7 +105,7 @@ export function SummaryPage() {
                 <th className="w-10 bg-wine py-3 font-semibold text-white">#</th>
                 <th className="bg-wine py-3 pl-2 text-left font-semibold text-white">Hạng mục</th>
                 {SIDES.map((s) => (
-                  <th key={s.key} className="w-44 py-3 pr-4 text-right font-semibold" style={{ background: s.bg, color: s.fg }}>
+                  <th key={s.key} className="w-44 py-3 pr-4 text-right font-semibold text-white" style={{ background: s.key === 'total' ? '#6f1f37' : s.fg }}>
                     {s.label}
                   </th>
                 ))}

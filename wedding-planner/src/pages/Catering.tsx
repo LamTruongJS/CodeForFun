@@ -21,7 +21,7 @@ export function CateringPage() {
   return (
     <div>
       <PageTitle>Khẩu phần ăn</PageTitle>
-      <div className="grid gap-5 2xl:grid-cols-2">
+      <div className="grid gap-5">
         <Section side="TRAI" />
         <Section side="GAI" />
       </div>
@@ -89,16 +89,25 @@ function Section({ side }: { side: GuestSide }) {
       >
         {desktop ? (
           <div className="overflow-x-auto px-3">
-            <table className="tbl">
+            <table className="tbl table-fixed min-w-[760px]">
+              <colgroup>
+                <col className="w-[64px]" />
+                <col />
+                <col className="w-[110px]" />
+                <col className="w-[150px]" />
+                <col className="w-[210px]" />
+                <col className="w-[160px]" />
+                <col className="w-12" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th className="w-[60px]">STT</th>
-                  <th className="min-w-[160px] text-left">Hạng mục</th>
-                  <th className="w-20">ĐVT</th>
-                  <th className="min-w-[110px]">Đơn giá (VNĐ)</th>
-                  <th className="min-w-[190px]">Số lượng</th>
-                  <th className="min-w-[110px]">Thành tiền (VNĐ)</th>
-                  <th className="w-10"></th>
+                  <th>STT</th>
+                  <th className="text-left">Hạng mục</th>
+                  <th className="text-left">ĐVT</th>
+                  <th className="text-right">Đơn giá (VNĐ)</th>
+                  <th>Số lượng</th>
+                  <th className="text-right">Thành tiền (VNĐ)</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -113,10 +122,10 @@ function Section({ side }: { side: GuestSide }) {
                   />
                 ))}
                 <tr>
-                  <td colSpan={5} className="!bg-wine px-3 py-3 font-semibold text-white">
+                  <td colSpan={5} className="!bg-wine px-3 py-3 font-semibold tracking-wide text-white">
                     TỔNG CỘNG {label}
                   </td>
-                  <td className="num !bg-wine px-3 py-3 text-right text-lg font-bold text-white">{fmtMoney(c.total)}</td>
+                  <td className="num !bg-wine px-2 py-3 text-right text-lg font-bold text-white">{fmtMoney(c.total)}</td>
                   <td className="!bg-wine"></td>
                 </tr>
               </tbody>

@@ -109,22 +109,40 @@ export function TasksPage() {
         }
       >
         {desktop ? (
-          <div className="max-h-[calc(100dvh-320px)] min-h-64 overflow-auto rounded-xl shadow-sm">
-            <table className="tbl">
+          <div className="max-h-[calc(100dvh-320px)] overflow-auto rounded-xl shadow-sm">
+            <table className="tbl table-fixed min-w-[1020px]">
+              <colgroup>
+                <col className="w-[68px]" />
+                <col />
+                <col className="w-[116px]" />
+                <col className="w-[116px]" />
+                <col className="w-[116px]" />
+                <col className="w-[134px]" />
+                <col className="w-[104px]" />
+                <col className="w-[14%]" />
+                <col className="w-12" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th className="sticky-l left-0 w-[68px] min-w-[68px]">STT</th>
-                  <th className="sticky-l left-[68px] min-w-[240px] text-left">Tên công việc</th>
-                  <th className="min-w-[130px]">Số tiền (VNĐ)</th>
-                  <th className="min-w-[130px]">Đã cọc (VNĐ)</th>
-                  <th className="min-w-[130px]">Còn lại (VNĐ)</th>
-                  <th className="min-w-[150px]">Bên</th>
-                  <th className="min-w-[120px]">Tiến độ</th>
-                  <th className="min-w-[160px]">Ghi chú</th>
-                  <th className="w-12"></th>
+                  <th className="sticky-l left-0">STT</th>
+                  <th className="sticky-l left-[68px] text-left">Tên công việc</th>
+                  <th className="text-right">Số tiền (VNĐ)</th>
+                  <th className="text-right">Đã cọc (VNĐ)</th>
+                  <th className="text-right">Còn lại (VNĐ)</th>
+                  <th>Bên</th>
+                  <th>Tiến độ</th>
+                  <th className="text-left">Ghi chú</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
+                {shown.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="py-10 text-center text-gray-400">
+                      Không có công việc phù hợp
+                    </td>
+                  </tr>
+                )}
                 {shown.map((t) => (
                   <TaskRow key={t.id} t={t} stt={stt.get(t.id)!} onPatch={(p) => updateTask(t.id, p)} onDelete={() => askDelete(t)} />
                 ))}
@@ -151,7 +169,7 @@ export function TasksPage() {
               <tfoot>
                 <tr>
                   <td className="sticky-l left-0"></td>
-                  <td className="sticky-l left-[68px]">TỔNG CỘNG</td>
+                  <td className="sticky-l left-[68px] tracking-wide text-wine">TỔNG CỘNG</td>
                   <td className="num text-right">{fmtMoney(totals.amount)}</td>
                   <td className="num text-right">{fmtMoney(totals.deposit)}</td>
                   <td className="num text-right" style={{ color: totals.remaining > 0 ? '#C55A11' : undefined }}>

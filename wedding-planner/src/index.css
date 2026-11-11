@@ -25,6 +25,8 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Đặt trong @layer components để class Tailwind (px-3, text-left…) ghi đè được */
+@layer components {
 /* ---------- Bảng ---------- */
 .tbl {
   border-collapse: separate;
@@ -87,7 +89,24 @@ body {
 .tbl tr.total td {
   background: var(--color-blush);
   font-weight: 700;
-  padding: 6px 8px;
+  padding: 8px 8px;
+}
+/* Dòng tổng dính đáy khung cuộn */
+.tbl tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  border-top: 1px solid #e7c9d2;
+}
+.tbl tfoot td.sticky-l {
+  z-index: 4;
+}
+/* Ô chữ trong bảng: hiện đủ nội dung khi rê chuột */
+.tbl td .cell:not(:focus) {
+  text-overflow: ellipsis;
+}
+.tbl tbody tr:not(.done):hover > td:not(.calc):not(.yellow) {
+  background-color: #fdf8fa;
 }
 
 /* Ô nhập trong bảng */
@@ -139,6 +158,8 @@ body {
   color: #999;
 }
 
+}
+
 .num {
   font-variant-numeric: tabular-nums;
 }
@@ -174,6 +195,7 @@ body {
   animation: dialog-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.1);
 }
 
+@layer components {
 /* Ô nhập trong form (bottom sheet) */
 .field {
   width: 100%;
@@ -223,15 +245,19 @@ textarea.field {
   border-color: #ebe3e6;
 }
 
+}
+
 .font-display {
   font-family: var(--font-display);
 }
 
 /* Dropdown tự vẽ */
+@layer components {
 .field.is-open {
   background: #fff;
   border-color: #8e2c48;
   box-shadow: 0 0 0 4px rgba(142, 44, 72, 0.1);
+}
 }
 @keyframes pop-in {
   from {

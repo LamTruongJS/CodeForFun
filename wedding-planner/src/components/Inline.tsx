@@ -32,6 +32,7 @@ export function InlineText({
     <input
       className={`cell ${err ? 'err' : ''} ${className}`}
       value={draft}
+      title={value ?? undefined}
       placeholder={placeholder}
       onChange={(e) => {
         setDraft(e.target.value)

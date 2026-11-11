@@ -141,21 +141,38 @@ export function GuestsPage({ side }: { side: GuestSide }) {
         }
       >
         {desktop ? (
-          <div className="max-h-[calc(100dvh-290px)] min-h-64 overflow-auto rounded-xl shadow-sm">
-            <table className="tbl">
+          <div className="max-h-[calc(100dvh-292px)] overflow-auto rounded-xl shadow-sm">
+            <table className="tbl table-fixed min-w-[1000px]">
+              <colgroup>
+                <col className="w-[68px]" />
+                <col />
+                <col className="w-[150px]" />
+                <col className="w-[92px]" />
+                <col className="w-[160px]" />
+                <col className="w-[160px]" />
+                <col className="w-[22%]" />
+                <col className="w-12" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th className="sticky-l left-0 w-[68px] min-w-[68px]">STT</th>
-                  <th className="sticky-l left-[68px] min-w-[220px] text-left">Họ và tên</th>
-                  <th className="min-w-[130px]">Địa chỉ</th>
-                  <th className="w-28">Dự kiến đi</th>
-                  <th className="min-w-[150px]">Tiền mừng dự kiến (VNĐ)</th>
-                  <th className="min-w-[150px]">Tiền mừng thực tế (VNĐ)</th>
-                  <th className="min-w-[200px]">Ghi chú</th>
-                  <th className="w-12"></th>
+                  <th className="sticky-l left-0">STT</th>
+                  <th className="sticky-l left-[68px] text-left">Họ và tên</th>
+                  <th className="text-left">Địa chỉ</th>
+                  <th className="text-right">Dự kiến đi</th>
+                  <th className="text-right">Mừng dự kiến (VNĐ)</th>
+                  <th className="text-right">Mừng thực tế (VNĐ)</th>
+                  <th className="text-left">Ghi chú</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
+                {shown.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="py-10 text-center text-gray-400">
+                      {filtering ? 'Không có khách phù hợp' : 'Chưa có khách mời — nhập tên ở dòng bên dưới để thêm'}
+                    </td>
+                  </tr>
+                )}
                 {shown.map((g) => (
                   <GuestRow key={g.id} g={g} stt={stt.get(g.id)!} onPatch={(p) => updateGuest(g.id, p)} onDelete={() => askDelete(g)} />
                 ))}

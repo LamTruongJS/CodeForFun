@@ -51,9 +51,9 @@ export function Btn({
 /** Dòng TỔNG CỘNG dính khi cuộn. */
 export function TotalsBar({ items }: { items: { label: string; value: string; strong?: boolean; color?: string }[] }) {
   return (
-    <div className="sticky top-[64px] z-20 mb-4 rounded-2xl border border-[#f0d9e0] bg-gradient-to-br from-[#fdf3f6] to-[#f8e5ea] px-4 py-3 shadow-[0_4px_16px_-8px_rgba(142,44,72,.35)] md:top-[72px]">
-      <div className="mb-1.5 text-[11px] font-semibold tracking-[0.12em] text-wine/80 uppercase">Tổng cộng</div>
-      <div className={`grid gap-x-3 gap-y-2 ${items.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
+    <div className="sticky top-[64px] z-20 mb-4 rounded-2xl border border-[#f0d9e0] bg-gradient-to-br from-[#fdf3f6] to-[#f8e5ea] px-4 py-3 shadow-[0_4px_16px_-8px_rgba(142,44,72,.35)] md:top-[72px] md:flex md:items-center md:gap-6 md:px-5 md:py-2.5">
+      <div className="mb-1.5 text-[11px] font-semibold tracking-[0.12em] text-wine/80 uppercase md:mb-0 md:shrink-0 md:border-r md:border-[#ecd2da] md:pr-6">Tổng cộng</div>
+      <div className={`grid flex-1 gap-x-3 gap-y-2 ${items.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
         {items.map((it) => (
           <div key={it.label} className="min-w-0">
             <div className="truncate text-[12px] text-gray-500">{it.label}</div>
