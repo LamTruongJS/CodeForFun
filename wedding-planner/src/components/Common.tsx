@@ -1,4 +1,4 @@
-import { useSyncExternalStore, type ReactNode } from 'react'
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import { useConfirmStore, useToast } from '../store/ui'
 import { MODAL_PANEL, Modal } from './Modal'
 
@@ -50,8 +50,21 @@ export function Btn({
 
 /** Dòng TỔNG CỘNG dính khi cuộn. */
 export function TotalsBar({ items }: { items: { label: string; value: string; strong?: boolean; color?: string }[] }) {
+  // Ghi chiều cao thanh vào biến CSS để tiêu đề bảng dính ngay bên dưới khi cuộn trang
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const root = document.documentElement.style
+    const ro = new ResizeObserver(() => root.setProperty('--totals-h', `${el.offsetHeight}px`))
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      root.removeProperty('--totals-h')
+    }
+  }, [])
   return (
-    <div className="sticky top-[64px] z-20 mb-4 rounded-2xl border border-[#f0d9e0] bg-gradient-to-br from-[#fdf3f6] to-[#f8e5ea] px-4 py-3 shadow-[0_4px_16px_-8px_rgba(142,44,72,.35)] md:top-[72px] md:flex md:items-center md:gap-6 md:px-5 md:py-2.5">
+    <div ref={ref} className="z-20 mb-4 md:sticky md:top-[72px] rounded-2xl border border-[#f0d9e0] bg-gradient-to-br from-[#fdf3f6] to-[#f8e5ea] px-4 py-3 shadow-[0_4px_16px_-8px_rgba(142,44,72,.35)] md:flex md:items-center md:gap-6 md:px-5 md:py-2.5">
       <div className="mb-1.5 text-[11px] font-semibold tracking-[0.12em] text-wine/80 uppercase md:mb-0 md:shrink-0 md:border-r md:border-[#ecd2da] md:pr-6">Tổng cộng</div>
       <div className={`grid flex-1 gap-x-3 gap-y-2 ${items.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
         {items.map((it) => (

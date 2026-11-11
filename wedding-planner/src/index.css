@@ -21,7 +21,7 @@ body {
   color: #2b2326;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip; /* clip (không phải hidden) để position: sticky vẫn hoạt động */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -299,6 +299,20 @@ body.is-dragging * {
 .drag-overlay {
   animation: lift 0.16s ease-out forwards;
   border-radius: 1rem;
+}
+
+/* Bảng cuộn theo trang (không có khung cuộn riêng) từ màn ≥1280px:
+   tiêu đề dính ngay dưới thanh Tổng cộng (top 72px + chiều cao thanh), dòng tổng dính đáy màn hình */
+@media (min-width: 1280px) {
+  .tbl-page .tbl thead th {
+    top: calc(72px + var(--totals-h, 0px));
+  }
+  .tbl-page .tbl thead th:first-child {
+    border-top-left-radius: 12px;
+  }
+  .tbl-page .tbl thead th:last-child {
+    border-top-right-radius: 12px;
+  }
 }
 
 /* Màn hình lớn (≥1536px): chữ trong bảng to hơn một chút */

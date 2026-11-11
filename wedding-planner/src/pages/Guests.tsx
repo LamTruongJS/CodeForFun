@@ -141,7 +141,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
         }
       >
         {desktop ? (
-          <div className="max-h-[calc(100dvh-292px)] overflow-auto rounded-xl shadow-sm">
+          <div className="tbl-page overflow-x-auto rounded-xl shadow-sm xl:overflow-visible">
             <table className="tbl table-fixed min-w-[1000px]">
               <colgroup>
                 <col className="w-[68px]" />
