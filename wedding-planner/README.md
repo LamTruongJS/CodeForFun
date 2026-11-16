@@ -3,7 +3,7 @@
 Web quản lý đám cưới (chỉ Frontend): khách mời hai nhà, khẩu phần ăn, công việc và trang tổng hợp tự tính.
 Vite + React + TypeScript + Tailwind + zustand + zod + dnd-kit.
 
-- Đăng nhập test: **`carrot0304` / `123123`** (khai báo ở `src/config/auth.ts`).
+- Đăng nhập: **`carrot0304` / `123123`** (mặc định, kiểm tra ở server `api/data.ts`; đổi bằng biến môi trường `APP_USERNAME` / `APP_PASSWORD`).
 - Trên điện thoại: danh sách dạng thẻ, chạm vào thẻ để sửa, nút **+** tròn để thêm, thanh điều hướng ở dưới.
 - Trên máy tính: bảng sửa trực tiếp từng ô (Enter hoặc rời ô để lưu), kéo tay nắm ⋮⋮ để đổi thứ tự.
 
@@ -20,15 +20,29 @@ npm run build    # build ra thư mục dist
 
 ## Dữ liệu được lưu ở đâu?
 
+Dữ liệu **không lưu trong trình duyệt nữa** mà lưu ở server, dùng chung cho mọi máy:
+
 | Môi trường | Lưu ở đâu |
 |---|---|
-| Lần đầu mở web | Nạp từ `src/data/seed-data.json`, sinh `id`, rồi lưu vào **localStorage** (`wedding-planner:data`) |
-| Mỗi lần thêm / sửa / xóa / kéo thả | Tự lưu ngay vào localStorage |
-| Trên Vercel | **Không ghi được vào file JSON** (web tĩnh, file chỉ đọc). Dùng trang **Dữ liệu → Xuất JSON / Nhập JSON** để sao lưu và chuyển máy |
-| Chạy local (`npm run dev`) | Trang **Dữ liệu** có thêm nút **💾 Ghi vào seed-data.json** — ghi thẳng dữ liệu hiện tại vào `src/data/seed-data.json` |
+| Web thật (Vercel) | **Upstash Redis** qua API `/api/data` (file `api/data.ts`). Deploy lại **không mất** dữ liệu. |
+| Chạy local (`npm run dev`) | Ghi thẳng vào **`src/data/seed-data.json`**. Nếu `.env.local` có biến Upstash (xem dưới) thì dùng chung dữ liệu với web thật. |
 
-Quy trình cập nhật dữ liệu gốc lên web: chạy `npm run dev` → sửa dữ liệu → bấm **Ghi vào seed-data.json** → commit & push → Vercel tự deploy lại.
-Lưu ý: người đã mở web trước đó vẫn thấy dữ liệu cũ trong localStorage của họ, cho tới khi bấm **Khôi phục dữ liệu gốc** (hoặc Nhập JSON).
+- Mỗi thay đổi (thêm / sửa / xóa / kéo thả) **tự lưu sau ~0,6 giây**; góc trên có chỉ báo *Đang lưu… / Đã lưu*.
+- Máy khác đang mở web sẽ **tự thấy thay đổi trong vòng ~4 giây** (và ngay khi quay lại tab).
+- Hai người sửa gần như cùng lúc: người lưu sau được báo *“Có người khác vừa sửa trước”*, web tải bản mới nhất về và thao tác vừa rồi cần làm lại — không ai bị ghi đè mất dữ liệu.
+- Lần đầu server còn trống: web đưa dữ liệu cũ trong trình duyệt (bản trước đây lưu localStorage) lên, nếu không có thì dùng `seed-data.json`. → **Mở web lần đầu trên máy đang có dữ liệu mới nhất.**
+- Trang **Dữ liệu** vẫn có Xuất JSON (sao lưu), Nhập JSON và Khôi phục dữ liệu gốc — áp dụng cho tất cả mọi người.
+
+### Bật kho dữ liệu trên Vercel (làm 1 lần)
+
+1. Vercel → mở project **wedding-planner** → tab **Storage** → **Create Database** → chọn **Upstash for Redis** (gói Free) → tạo và **Connect** vào project (tick đủ Production, Preview, Development).
+   Vercel tự thêm biến `KV_REST_API_URL`, `KV_REST_API_TOKEN`.
+2. (Nên làm) **Settings → Environment Variables**: thêm `APP_USERNAME`, `APP_PASSWORD` để đổi tài khoản đăng nhập.
+3. **Deployments** → bản mới nhất → **Redeploy**.
+
+Chưa làm bước 1 thì web báo *“Server chưa được kết nối kho dữ liệu”* (dữ liệu cũ trong trình duyệt vẫn còn nguyên, chưa bị xóa).
+
+Muốn chạy local mà dùng chung dữ liệu với web thật: `npx vercel env pull .env.local` (hoặc tự tạo `.env.local` chứa 2 biến `KV_REST_API_URL`, `KV_REST_API_TOKEN`) rồi `npm run dev`.
 
 ## Deploy lên Vercel (qua GitHub)
 
@@ -50,7 +64,7 @@ git push origin main
 1. Vào <https://vercel.com/new> → đăng nhập bằng GitHub → chọn repo **CodeForFun** → **Import**.
 2. **Root Directory**: bấm **Edit** → chọn `wedding-planner`.
 3. **Framework Preset**: `Vite` (Vercel tự nhận). Build command `npm run build`, Output `dist`.
-4. Không cần Environment Variables → bấm **Deploy**.
+4. Bấm **Deploy**, rồi làm mục **Bật kho dữ liệu trên Vercel** ở trên.
 5. Xong sẽ có link dạng `https://wedding-planner-xxx.vercel.app`. Mở trên điện thoại → menu trình duyệt → **Thêm vào màn hình chính** để dùng như app.
 
 Từ đó, mỗi lần `git push` lên `main`, Vercel tự build và deploy lại.
@@ -70,13 +84,15 @@ vercel --prod   # deploy bản chính thức
 
 ```
 src/
-  config/auth.ts          tài khoản test
+  config/auth.ts          khóa lưu phiên đăng nhập
+api/data.ts               API dữ liệu (Vercel Function + Upstash Redis; dev dùng file JSON)
   data/seed-data.json     dữ liệu gốc
   lib/schema.ts           zod schema + chuẩn hóa (sinh id, đánh lại sortOrder)
   lib/calc.ts             toàn bộ công thức tính (mục 6 của đặc tả)
   lib/calc.test.ts        unit test
   lib/format.ts           định dạng tiền vi-VN, kiểm tra số nhập
-  store/useAppStore.ts    zustand + persist (localStorage)
+  store/useAppStore.ts    zustand (dữ liệu trong bộ nhớ)
+  store/sync.ts           tải / tự lưu / đồng bộ với server
   store/ui.ts             đăng nhập, toast, hộp thoại xác nhận
   components/             ô nhập inline, chip, kéo thả, form sửa (bottom sheet)…
   pages/                  Login, Summary, Guests, Catering, Tasks, Data

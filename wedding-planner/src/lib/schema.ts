@@ -55,15 +55,6 @@ export const importSchema = z.object({
   updatedAt: z.string().optional(),
 })
 
-/** Dữ liệu lưu trong localStorage: bắt buộc đủ id + schemaVersion = 1. */
-export const storedSchema = importSchema.extend({
-  schemaVersion: z.literal(1),
-  guests: z.array(guest.extend({ id: z.string() })),
-  cateringItems: z.array(item.extend({ id: z.string() })),
-  tasks: z.array(task.extend({ id: z.string() })),
-  updatedAt: z.string(),
-})
-
 export function formatZodError(err: z.ZodError): string {
   return err.issues
     .slice(0, 5)

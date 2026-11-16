@@ -8,15 +8,20 @@ export function LoginPage() {
   const [u, setU] = useState('')
   const [p, setP] = useState('')
   const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
   if (loggedIn) return <Navigate to="/" replace />
   return (
     <div className="flex min-h-dvh items-center justify-center bg-[radial-gradient(ellipse_at_top,#f8e5ea,#faf6f7_60%)] p-4">
       <form
         className="w-full max-w-sm rounded-[28px] border border-[#f0dfe5] bg-white/90 p-7 shadow-[0_20px_60px_-20px_rgba(142,44,72,.35)] backdrop-blur"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault()
-          if (login(u, p)) nav('/', { replace: true })
-          else setErr('Tên đăng nhập hoặc mật khẩu không đúng')
+          if (busy) return
+          setBusy(true)
+          const error = await login(u, p)
+          setBusy(false)
+          if (error) setErr(error)
+          else nav('/', { replace: true })
         }}
       >
         <img src="/icons/icon-192.png" alt="" className="mx-auto mb-3 h-16 w-16 rounded-2xl shadow-lg shadow-wine/30" />
@@ -50,8 +55,8 @@ export function LoginPage() {
           />
         </label>
         {err && <div className="mb-3 rounded-2xl bg-red-50 px-4 py-2.5 text-[13px] text-red-700">{err}</div>}
-        <button type="submit" className="h-12 w-full rounded-2xl bg-gradient-to-b from-[#9b3352] to-[#7d2640] font-semibold text-white shadow-md shadow-wine/25 transition active:scale-[.98]">
-          Đăng nhập
+        <button type="submit" className="h-12 w-full rounded-2xl bg-gradient-to-b from-[#9b3352] to-[#7d2640] font-semibold text-white shadow-md shadow-wine/25 transition active:scale-[.98] disabled:opacity-70" disabled={busy}>
+          {busy ? 'Đang kiểm tra…' : 'Đăng nhập'}
         </button>
       </form>
     </div>

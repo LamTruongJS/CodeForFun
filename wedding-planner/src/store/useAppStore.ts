@@ -1,11 +1,11 @@
 import { create } from 'zustand'
-import { persist, type PersistStorage } from 'zustand/middleware'
 import { arrayMove } from '@dnd-kit/sortable'
 import seedRaw from '../data/seed-data.json'
-import { formatZodError, parseImport, storedSchema, uid } from '../lib/schema'
+import { parseImport, uid } from '../lib/schema'
 import type { AppData, CateringItem, Guest, GuestSide, Task } from '../lib/types'
 
-export const DATA_KEY = 'wedding-planner:data'
+/** Khóa localStorage của bản cũ (trước khi lưu lên server) — chỉ đọc 1 lần để chuyển dữ liệu lên. */
+export const LEGACY_DATA_KEY = 'wedding-planner:data'
 
 export function loadSeed(): AppData {
   const r = parseImport(seedRaw)
@@ -13,36 +13,7 @@ export function loadSeed(): AppData {
   return r.data
 }
 
-/** Lỗi khi đọc localStorage (dữ liệu hỏng / sai phiên bản). */
-export let storageLoadError: string | null = null
-
 type State = { data: AppData }
-
-/** Lưu thẳng AppData (có schemaVersion) vào localStorage, kiểm tra zod khi đọc. */
-const storage: PersistStorage<State> = {
-  getItem: (name) => {
-    const raw = localStorage.getItem(name)
-    if (raw == null) return null
-    try {
-      const json = JSON.parse(raw)
-      if (json?.schemaVersion !== 1) {
-        storageLoadError = `Phiên bản dữ liệu không khớp (schemaVersion = ${json?.schemaVersion ?? 'trống'}).`
-        return null
-      }
-      const r = storedSchema.safeParse(json)
-      if (!r.success) {
-        storageLoadError = 'Dữ liệu lưu trong trình duyệt bị lỗi:\n' + formatZodError(r.error)
-        return null
-      }
-      return { state: { data: r.data as AppData }, version: 1 }
-    } catch {
-      storageLoadError = 'Dữ liệu lưu trong trình duyệt không phải JSON hợp lệ.'
-      return null
-    }
-  },
-  setItem: (name, value) => localStorage.setItem(name, JSON.stringify(value.state.data)),
-  removeItem: (name) => localStorage.removeItem(name),
-}
 
 type Actions = {
   // khách mời
@@ -86,8 +57,8 @@ const renumber = <T extends { sortOrder: number }>(list: T[]) =>
 
 const nextOrder = (list: { sortOrder: number }[]) => list.reduce((m, x) => Math.max(m, x.sortOrder), 0) + 1
 
+// Dữ liệu chỉ nằm trong bộ nhớ; store/sync.ts tải từ server và tự lưu lên server sau mỗi thay đổi.
 export const useAppStore = create<State & Actions>()(
-  persist(
     (set) => {
       const mut = (fn: (d: AppData) => Partial<AppData>) =>
         set((s) => ({ data: { ...s.data, ...fn(s.data), updatedAt: new Date().toISOString() } }))
@@ -182,22 +153,7 @@ export const useAppStore = create<State & Actions>()(
         reorderTask: (a, o) => mut((d) => ({ tasks: reorder(d.tasks, () => true, a, o) })),
 
         replaceData: (data) => set({ data: { ...data, updatedAt: new Date().toISOString() } }),
-        resetToSeed: () => {
-          storageLoadError = null
-          set({ data: loadSeed() })
-        },
+        resetToSeed: () => set({ data: loadSeed() }),
       }
     },
-    {
-      name: DATA_KEY,
-      storage,
-      version: 1,
-      partialize: (s) => ({ data: s.data }) as State,
-    },
-  ),
 )
-
-// Lần đầu mở web: chưa có dữ liệu → ghi seed (đã sinh id) vào localStorage.
-if (typeof window !== 'undefined' && localStorage.getItem(DATA_KEY) == null) {
-  localStorage.setItem(DATA_KEY, JSON.stringify(useAppStore.getState().data))
-}

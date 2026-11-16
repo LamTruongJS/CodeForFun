@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../store/ui'
 import { ConfirmHost, ToastHost } from './Common'
-import { LoadErrorGate } from './LoadErrorGate'
+import { SaveIndicator, SyncGate } from './SyncGate'
+import { flushNow, stopSync } from '../store/sync'
 
 const I = ({ d }: { d: ReactNode }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -58,7 +59,9 @@ export const NAV = [
 export function Layout() {
   const logout = useAuth((s) => s.logout)
   const nav = useNavigate()
-  const doLogout = () => {
+  const doLogout = async () => {
+    await flushNow()
+    stopSync()
     logout()
     nav('/login', { replace: true })
   }
@@ -87,20 +90,27 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
+          <div className="ml-auto">
+            <SaveIndicator />
+          </div>
           <button
             onClick={doLogout}
-            className="ml-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Đăng xuất"
+            title="Đăng xuất"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
             </svg>
-            Đăng xuất
+            <span className="hidden sm:inline">Đăng xuất</span>
           </button>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-4 pt-4 pb-28 md:px-6 md:pt-6 md:pb-12 2xl:max-w-[1600px] 2xl:px-8">
-        <Outlet />
+        <SyncGate>
+          <Outlet />
+        </SyncGate>
       </main>
 
       {/* Thanh điều hướng dưới cùng cho điện thoại */}
@@ -128,7 +138,6 @@ export function Layout() {
 
       <ToastHost />
       <ConfirmHost />
-      <LoadErrorGate />
     </div>
   )
 }

@@ -1,47 +1,78 @@
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import fs from 'node:fs'
 import path from 'node:path'
+import { handle, redisStorage, type Storage } from './api/data'
+
+const SEED_FILE = path.resolve(import.meta.dirname, 'src/data/seed-data.json')
 
 /**
- * Chỉ chạy khi `npm run dev` (máy local): cho phép trang Dữ liệu ghi
- * trực tiếp dữ liệu hiện tại vào src/data/seed-data.json.
- * Trên Vercel (web tĩnh) endpoint này không tồn tại.
+ * Kho dữ liệu khi chạy local: ghi thẳng vào src/data/seed-data.json.
+ * Phiên bản = trường updatedAt trong file. File seed gốc (chưa có id/updatedAt)
+ * được coi là "chưa có dữ liệu" → web tự nạp seed rồi ghi lại vào file.
  */
-function devSaveSeed(): Plugin {
+function fileStorage(file: string): Storage {
+  const read = () => {
+    try {
+      const d = JSON.parse(fs.readFileSync(file, 'utf8'))
+      const ready = d?.schemaVersion === 1 && typeof d.updatedAt === 'string' && Array.isArray(d.guests) && d.guests.every((g: { id?: string }) => g.id)
+      return ready ? { data: d, version: d.updatedAt as string } : { data: null, version: null }
+    } catch {
+      return { data: null, version: null }
+    }
+  }
   return {
-    name: 'dev-save-seed',
+    async get() {
+      return read()
+    },
+    async version() {
+      return read().version
+    },
+    async put(json, base, _version) {
+      if ((read().version ?? '') !== (base ?? '')) return false
+      fs.writeFileSync(file, JSON.stringify(JSON.parse(json), null, 2) + '\n', 'utf8')
+      return true
+    },
+  }
+}
+
+/** Chạy API /api/data ngay trong dev server (giống hệt bản trên Vercel). */
+function devDataApi(env: Record<string, string>): Plugin {
+  const url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL
+  const token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN
+  // Có khai báo Redis trong .env.local → dùng chung dữ liệu với web thật; không thì ghi file JSON
+  const storage = url && token ? redisStorage(url, token) : fileStorage(SEED_FILE)
+  return {
+    name: 'dev-data-api',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/__dev/save-seed', (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405
-          return res.end()
-        }
-        let body = ''
-        req.on('data', (c) => (body += c))
-        req.on('end', () => {
-          try {
-            const json = JSON.parse(body)
-            const file = path.resolve(import.meta.dirname, 'src/data/seed-data.json')
-            fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n', 'utf8')
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ ok: true }))
-          } catch (e) {
-            res.statusCode = 400
-            res.end(JSON.stringify({ ok: false, error: String(e) }))
-          }
+      server.config.logger.info(`  ➜  Dữ liệu: ${url && token ? 'Upstash Redis (.env.local)' : 'src/data/seed-data.json'}`)
+      server.middlewares.use('/api/data', async (req, res) => {
+        const chunks: Buffer[] = []
+        for await (const c of req) chunks.push(c as Buffer)
+        const request = new Request(`http://localhost${req.originalUrl ?? req.url}`, {
+          method: req.method,
+          headers: req.headers as Record<string, string>,
+          body: req.method === 'GET' || req.method === 'HEAD' ? undefined : Buffer.concat(chunks),
         })
+        const r = await handle(request, storage)
+        res.statusCode = r.status
+        r.headers.forEach((v, k) => res.setHeader(k, v))
+        res.end(Buffer.from(await r.arrayBuffer()))
       })
     },
   }
 }
 
-export default defineConfig({
-  plugins: [react(), tailwindcss(), devSaveSeed()],
-  server: {
-    // Không reload trang khi file seed bị ghi đè
-    watch: { ignored: ['**/src/data/seed-data.json'] },
-  },
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, import.meta.dirname, '')
+  for (const k of ['APP_USERNAME', 'APP_PASSWORD']) if (env[k]) process.env[k] = env[k]
+  return {
+    plugins: [react(), tailwindcss(), devDataApi(env)],
+    server: {
+      // Không reload trang khi file dữ liệu bị ghi đè
+      watch: { ignored: ['**/src/data/seed-data.json'] },
+    },
+  }
 })

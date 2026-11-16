@@ -10,7 +10,6 @@ export function DataPage() {
   const { replaceData, resetToSeed } = useAppStore()
   const fileRef = useRef<HTMLInputElement>(null)
   const [importErr, setImportErr] = useState('')
-  const [saving, setSaving] = useState(false)
 
   const exportJson = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -37,7 +36,7 @@ export function DataPage() {
     }
     const ok = await confirmDialog({
       title: 'Nhập dữ liệu?',
-      message: `Dữ liệu hiện tại sẽ bị thay thế.\n\nFile có ${r.data.guests.length} khách, ${r.data.tasks.length} công việc, ${r.data.cateringItems.length} hạng mục.`,
+      message: `Dữ liệu hiện tại sẽ bị thay thế cho tất cả mọi người.\n\nFile có ${r.data.guests.length} khách, ${r.data.tasks.length} công việc, ${r.data.cateringItems.length} hạng mục.`,
       okText: 'Thay thế',
       danger: true,
     })
@@ -51,7 +50,7 @@ export function DataPage() {
     if (
       await confirmDialog({
         title: 'Khôi phục dữ liệu gốc?',
-        message: 'Toàn bộ dữ liệu hiện tại sẽ bị xóa và nạp lại từ seed-data.json. Nên Xuất JSON trước để sao lưu.',
+        message: 'Toàn bộ dữ liệu hiện tại (của tất cả mọi người) sẽ bị xóa và nạp lại từ seed-data.json. Nên Xuất JSON trước để sao lưu.',
         okText: 'Khôi phục',
         danger: true,
       })
@@ -61,27 +60,10 @@ export function DataPage() {
     }
   }
 
-  const saveToSeedFile = async () => {
-    setSaving(true)
-    try {
-      const res = await fetch('/__dev/save-seed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      if (!res.ok) throw new Error(await res.text())
-      toast('Đã ghi vào src/data/seed-data.json', 'success')
-    } catch (e) {
-      toast('Ghi file thất bại: ' + String(e))
-    } finally {
-      setSaving(false)
-    }
-  }
-
   return (
     <div className="max-w-2xl">
       <PageTitle>Dữ liệu</PageTitle>
-      <p className="mb-4 text-sm text-gray-500">Lần lưu gần nhất: {fmtDateTime(data.updatedAt)}</p>
+      <p className="mb-4 text-sm text-gray-500">Lần lưu gần nhất lên server: {fmtDateTime(data.updatedAt)}</p>
 
       <div className="space-y-3">
         <Card title="Xuất JSON" desc="Tải về toàn bộ dữ liệu hiện tại để sao lưu hoặc chuyển sang máy khác.">
@@ -112,19 +94,9 @@ export function DataPage() {
           </Btn>
         </Card>
 
-        {import.meta.env.DEV && (
-          <Card
-            title="Ghi trực tiếp vào file seed-data.json (chỉ khi chạy local)"
-            desc="Chỉ hoạt động khi chạy `npm run dev` trên máy. Ghi dữ liệu hiện tại vào src/data/seed-data.json để commit lên GitHub — lần deploy sau, web sẽ dùng dữ liệu này làm dữ liệu gốc."
-          >
-            <Btn variant="outline" onClick={saveToSeedFile}>
-              {saving ? 'Đang ghi…' : '💾 Ghi vào seed-data.json'}
-            </Btn>
-          </Card>
-        )}
-
         <p className="text-xs text-gray-400">
-          Dữ liệu được lưu trong trình duyệt (localStorage) của máy này. Mở trên máy / trình duyệt khác sẽ không thấy — hãy dùng Xuất/Nhập JSON để chuyển.
+          Dữ liệu được lưu trên server và tự lưu sau mỗi thay đổi — mọi máy đăng nhập đều thấy cùng một dữ liệu, deploy lại không mất.
+          {import.meta.env.DEV && ' (Đang chạy local: dữ liệu ghi thẳng vào src/data/seed-data.json, trừ khi .env.local khai báo Upstash Redis.)'}
         </p>
       </div>
     </div>
