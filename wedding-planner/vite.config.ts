@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import fs from 'node:fs'
 import path from 'node:path'
-import { handle, redisStorage, type Storage } from './api/data'
+import { findRedisEnv, handle, redisStorage, type Storage } from './api/data'
 
 const SEED_FILE = path.resolve(import.meta.dirname, 'src/data/seed-data.json')
 
@@ -39,15 +39,14 @@ function fileStorage(file: string): Storage {
 
 /** Chạy API /api/data ngay trong dev server (giống hệt bản trên Vercel). */
 function devDataApi(env: Record<string, string>): Plugin {
-  const url = env.KV_REST_API_URL || env.UPSTASH_REDIS_REST_URL
-  const token = env.KV_REST_API_TOKEN || env.UPSTASH_REDIS_REST_TOKEN
   // Có khai báo Redis trong .env.local → dùng chung dữ liệu với web thật; không thì ghi file JSON
-  const storage = url && token ? redisStorage(url, token) : fileStorage(SEED_FILE)
+  const redis = findRedisEnv(env)
+  const storage = redis ? redisStorage(redis.url, redis.token) : fileStorage(SEED_FILE)
   return {
     name: 'dev-data-api',
     apply: 'serve',
     configureServer(server) {
-      server.config.logger.info(`  ➜  Dữ liệu: ${url && token ? 'Upstash Redis (.env.local)' : 'src/data/seed-data.json'}`)
+      server.config.logger.info(`  ➜  Dữ liệu: ${redis ? 'Upstash Redis (.env.local)' : 'src/data/seed-data.json'}`)
       server.middlewares.use('/api/data', async (req, res) => {
         const chunks: Buffer[] = []
         for await (const c of req) chunks.push(c as Buffer)

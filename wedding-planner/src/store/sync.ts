@@ -9,13 +9,16 @@ import { toast, useAuth } from './ui'
  * Đồng bộ dữ liệu với server (/api/data):
  * - Mở web: tải dữ liệu từ server (server trống → đưa dữ liệu cũ trong trình duyệt hoặc seed lên).
  * - Mỗi thay đổi: gom trong SAVE_DELAY rồi lưu lên server.
- * - Mỗi POLL_MS (khi tab đang mở): hỏi server có bản mới không → có thì tải về (người khác vừa sửa).
+ * - Mỗi POLL_MS (khi tab đang mở và có người đang thao tác): hỏi server có bản mới không → có thì tải về.
+ *   Không ai chạm chuột / bàn phím quá IDLE_MS thì ngừng hỏi (tiết kiệm hạn mức Upstash gói Free),
+ *   thao tác lại thì hỏi ngay.
  * - Người khác lưu trước (409): tải bản mới nhất về, báo cho người dùng.
  */
 
 const SAVE_DELAY = 600
 const POLL_MS = 4000
 const RETRY_MS = 5000
+const IDLE_MS = 3 * 60 * 1000
 
 export type SyncStatus = 'loading' | 'ready' | 'error'
 export type SaveState = 'saved' | 'pending' | 'saving' | 'error'
@@ -43,6 +46,7 @@ let saving = false
 let saveTimer: ReturnType<typeof setTimeout> | undefined
 let pollTimer: ReturnType<typeof setInterval> | undefined
 let started = false
+let lastActivity = Date.now()
 
 const token = () => useAuth.getState().token ?? ''
 
@@ -154,8 +158,10 @@ async function flush() {
   if (dirty) scheduleSave()
 }
 
+const isIdle = () => Date.now() - lastActivity > IDLE_MS
+
 async function poll() {
-  if (document.visibilityState !== 'visible' || dirty || saving || useSync.getState().status !== 'ready') return
+  if (document.visibilityState !== 'visible' || isIdle() || dirty || saving || useSync.getState().status !== 'ready') return
   try {
     const r = await fetchRemote(token(), version ?? '')
     if (r && !dirty && !saving) applyRemote(r)
@@ -165,7 +171,7 @@ async function poll() {
 }
 
 const onVisible = () => {
-  if (document.visibilityState === 'visible') poll()
+  if (document.visibilityState === 'visible') onActivity()
   else if (dirty) flush() // rời tab / khóa màn hình điện thoại → lưu ngay
 }
 const onBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -174,6 +180,14 @@ const onBeforeUnload = (e: BeforeUnloadEvent) => {
     e.preventDefault()
   }
 }
+
+/** Có người thao tác: ghi nhận; nếu vừa "ngủ" dậy thì hỏi server ngay. */
+const onActivity = () => {
+  const wasIdle = isIdle()
+  lastActivity = Date.now()
+  if (wasIdle) poll()
+}
+const ACTIVITY_EVENTS = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart', 'scroll'] as const
 
 let unsubscribe: (() => void) | undefined
 
@@ -189,8 +203,10 @@ export function startSync() {
   })
   pollTimer = setInterval(poll, POLL_MS)
   document.addEventListener('visibilitychange', onVisible)
-  window.addEventListener('focus', poll)
+  window.addEventListener('focus', onActivity)
   window.addEventListener('beforeunload', onBeforeUnload)
+  for (const ev of ACTIVITY_EVENTS) window.addEventListener(ev, onActivity, { passive: true, capture: true })
+  lastActivity = Date.now()
   loadFromServer()
 }
 
@@ -201,8 +217,9 @@ export function stopSync() {
   clearInterval(pollTimer)
   clearTimeout(saveTimer)
   document.removeEventListener('visibilitychange', onVisible)
-  window.removeEventListener('focus', poll)
+  window.removeEventListener('focus', onActivity)
   window.removeEventListener('beforeunload', onBeforeUnload)
+  for (const ev of ACTIVITY_EVENTS) window.removeEventListener(ev, onActivity, { capture: true })
   version = null
   dirty = false
   useSync.setState({ status: 'loading', loadError: null, save: 'saved', saveError: null })

@@ -138,10 +138,26 @@ export function redisStorage(url: string, token: string): Storage {
   }
 }
 
+/**
+ * Tìm biến Upstash trong môi trường. Vercel đặt tên theo "Custom Prefix" lúc kết nối
+ * (mặc định KV → KV_REST_API_URL), nên chấp nhận mọi tiền tố: <PREFIX>_REST_API_URL / _TOKEN.
+ */
+export function findRedisEnv(vars: Record<string, string | undefined>): { url: string; token: string } | null {
+  const pairs: [string, string][] = [
+    ['KV_REST_API_URL', 'KV_REST_API_TOKEN'],
+    ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'],
+  ]
+  for (const k of Object.keys(vars)) {
+    if (k.endsWith('_REST_API_URL')) pairs.push([k, k.replace(/_URL$/, '_TOKEN')])
+    if (k.endsWith('_REDIS_REST_URL')) pairs.push([k, k.replace(/_URL$/, '_TOKEN')])
+  }
+  for (const [u, t] of pairs) if (vars[u] && vars[t]) return { url: vars[u]!, token: vars[t]! }
+  return null
+}
+
 function storageFromEnv(): Storage | null {
-  const url = env('KV_REST_API_URL') ?? env('UPSTASH_REDIS_REST_URL')
-  const token = env('KV_REST_API_TOKEN') ?? env('UPSTASH_REDIS_REST_TOKEN')
-  return url && token ? redisStorage(url, token) : null
+  const r = typeof process !== 'undefined' ? findRedisEnv(process.env) : null
+  return r ? redisStorage(r.url, r.token) : null
 }
 
 // ---------- Điểm vào của Vercel Function ----------
