@@ -170,13 +170,13 @@ export function Select({
           <div
             ref={popRef}
             role="listbox"
-            className="anim-pop fixed z-[100] flex flex-col overflow-hidden rounded-2xl border border-[#efe5e9] bg-white shadow-[0_16px_40px_-12px_rgba(60,20,35,.35)]"
+            className="anim-pop fixed z-[100] flex flex-col overflow-hidden rounded-2xl border border-[#efe2d6] bg-white shadow-[0_16px_40px_-12px_rgba(60,20,35,.35)]"
             style={pos}
             onKeyDown={onKey}
             onClick={(e) => e.stopPropagation()}
           >
             {canSearch && (
-              <div className="border-b border-[#f3ecef] p-2">
+              <div className="border-b border-[#f3ebe3] p-2">
                 <input
                   // điện thoại: không tự bật bàn phím che mất danh sách
                   autoFocus={window.matchMedia('(pointer: fine)').matches}
@@ -211,7 +211,7 @@ export function Select({
                     <span className="min-w-0 flex-1 truncate">
                       {o.empty ? <span className="text-gray-500">{o.label}</span> : <OptionLabel o={o} />}
                     </span>
-                    {o.hint && <span className="shrink-0 rounded-full bg-[#f3ecef] px-2 py-0.5 text-[12px] font-medium text-gray-500">{o.hint}</span>}
+                    {o.hint && <span className="shrink-0 rounded-full bg-[#f3ebe3] px-2 py-0.5 text-[12px] font-medium text-gray-500">{o.hint}</span>}
                     <span className="w-4 shrink-0 text-wine">
                       {selected && (
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

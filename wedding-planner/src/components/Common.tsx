@@ -14,10 +14,20 @@ export function useIsDesktop() {
   )
 }
 
-export function PageTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
+export function PageTitle({ children, right, eyebrow = 'Lâm Trường & Lệ Huyền · 20.12.2026' }: { children: ReactNode; right?: ReactNode; eyebrow?: string }) {
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-      <h1 className="font-display text-[22px] leading-tight font-bold text-wine md:text-[28px]">{children}</h1>
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <p className="text-[10.5px] font-semibold tracking-[0.3em] text-gold uppercase md:text-[11px]">{eyebrow}</p>
+        <h1 className="mt-1 font-display text-[26px] leading-tight font-bold text-wine md:text-[34px]">{children}</h1>
+        <div className="mt-1.5 flex items-center gap-2 text-gold-soft">
+          <span className="h-px w-10 bg-gold-soft" />
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.9 4.5 6.6 4.5c2.1 0 3.5 1.1 4.4 2.4h2c.9-1.3 2.3-2.4 4.4-2.4 3.7 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21Z" />
+          </svg>
+          <span className="h-px w-10 bg-gold-soft" />
+        </div>
+      </div>
       {right}
     </div>
   )
@@ -64,8 +74,8 @@ export function TotalsBar({ items }: { items: { label: string; value: string; st
     }
   }, [])
   return (
-    <div ref={ref} className="z-20 mb-4 md:sticky md:top-[72px] rounded-2xl border border-[#f0d9e0] bg-gradient-to-br from-[#fdf3f6] to-[#f8e5ea] px-4 py-3 shadow-[0_4px_16px_-8px_rgba(142,44,72,.35)] md:flex md:items-center md:gap-6 md:px-5 md:py-2.5">
-      <div className="mb-1.5 text-[11px] font-semibold tracking-[0.12em] text-wine/80 uppercase md:mb-0 md:shrink-0 md:border-r md:border-[#ecd2da] md:pr-6">Tổng cộng</div>
+    <div ref={ref} className="z-20 mb-4 rounded-2xl border border-[#ead9c4] bg-gradient-to-br from-[#fffaf3] to-[#f8ece0] px-4 py-3 shadow-[0_6px_20px_-10px_rgba(120,70,40,.35)] md:sticky md:top-[72px] md:flex md:items-center md:gap-6 md:px-5 md:py-2.5">
+      <div className="mb-1.5 font-display text-[13px] font-semibold tracking-[0.12em] text-gold uppercase md:mb-0 md:shrink-0 md:border-r md:border-[#e6d2b5] md:pr-6">Tổng cộng</div>
       <div className={`grid flex-1 gap-x-3 gap-y-2 ${items.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
         {items.map((it) => (
           <div key={it.label} className="min-w-0">

@@ -62,7 +62,7 @@ export function DataPage() {
 
   return (
     <div className="max-w-2xl">
-      <PageTitle>Dữ liệu</PageTitle>
+      <PageTitle eyebrow="Sao lưu · khôi phục">Dữ liệu</PageTitle>
       <p className="mb-4 text-sm text-gray-500">Lần lưu gần nhất lên server: {fmtDateTime(data.updatedAt)}</p>
 
       <div className="space-y-3">
@@ -105,8 +105,8 @@ export function DataPage() {
 
 function Card({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-3xl border border-[#efe5e9] bg-white p-5 shadow-[0_1px_3px_rgba(80,30,45,.06)]">
-      <h2 className="font-semibold text-[#2b2326]">{title}</h2>
+    <div className="rounded-3xl border border-[#efe2d6] bg-white/85 p-5 shadow-[0_10px_30px_-22px_rgba(90,30,50,.5)] backdrop-blur">
+      <h2 className="font-display text-[18px] font-bold text-wine">{title}</h2>
       <p className="mt-0.5 mb-4 text-[13px] text-gray-500">{desc}</p>
       {children}
     </div>

@@ -51,7 +51,7 @@ export function TasksPage() {
 
   return (
     <div>
-      <PageTitle right={desktop ? <Btn onClick={() => newRowRef.current?.focus()}>+ Thêm việc</Btn> : undefined}>
+      <PageTitle eyebrow="Việc cần chuẩn bị" right={desktop ? <Btn onClick={() => newRowRef.current?.focus()}>+ Thêm việc</Btn> : undefined}>
         Công việc cần làm
       </PageTitle>
 
@@ -243,7 +243,7 @@ function FilterRow<V extends string>({
           key={v}
           onClick={() => onChange(v)}
           className={`shrink-0 rounded-full border-[1.5px] px-3.5 py-1 text-[13px] font-medium whitespace-nowrap transition ${
-            value === v ? 'border-[#ED7D31] bg-[#ED7D31] text-white' : 'border-[#ebe0e4] bg-white text-gray-600'
+            value === v ? 'border-wine bg-wine text-white' : 'border-[#e8dccf] bg-white/80 text-gray-600 hover:border-[#d9c3a8]'
           }`}
         >
           {l}
@@ -301,7 +301,7 @@ function TaskCard({ t, stt, onOpen, onPatch }: { t: Task; stt: number; onOpen: (
       id={t.id}
       whole
       style={{ background: done ? '#D9EAD3' : '#fff' }}
-      className="flex items-start gap-2 rounded-2xl border border-[#efe5e9] p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition-[scale] active:scale-[.985]"
+      className="flex items-start gap-2 rounded-2xl border border-[#efe2d6] p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition-[scale] active:scale-[.985]"
       onClick={onOpen}
     >
       <div className="flex flex-col items-center">

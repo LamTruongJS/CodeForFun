@@ -40,24 +40,18 @@ export function cateringForSide(
   const guestTables = tablesFor(people, peoplePerTable)
   const relativeTables = n(setting?.relativeTables)
   const tables = guestTables + relativeTables
-  const items = bySortOrder(data.cateringItems.filter((i) => i.side === side)).map((item) => ({
-    item,
-    quantity: itemQuantity(item, tables),
-    total: itemTotal(item, tables),
-  }))
+  const calcItems = (group: CateringItem['group'], t: number) =>
+    bySortOrder(data.cateringItems.filter((i) => i.side === side && i.group === group)).map((item) => ({
+      item,
+      quantity: itemQuantity(item, t),
+      total: itemTotal(item, t),
+    }))
+  const items = calcItems('TIEC', tables)
   const itemsTotal = items.reduce((s, x) => s + x.total, 0)
-  // Nhóm họ: ăn (số bàn × đơn giá 1 bàn) + nước uống (số lượng × đơn giá)
-  const foodTotal = n(setting?.nhomHoTables) * n(setting?.nhomHoPricePerTable)
-  const drinkTotal = n(setting?.nhomHoDrinkQty) * n(setting?.nhomHoDrinkPrice)
-  const nhomHo = {
-    tables: n(setting?.nhomHoTables),
-    pricePerTable: setting?.nhomHoPricePerTable ?? null,
-    foodTotal,
-    drinkQty: n(setting?.nhomHoDrinkQty),
-    drinkPrice: setting?.nhomHoDrinkPrice ?? null,
-    drinkTotal,
-    total: foodTotal + drinkTotal,
-  }
+  // Nhóm họ: danh sách hạng mục riêng; "theo số bàn" = số bàn nhóm họ
+  const nhomHoTables = n(setting?.nhomHoTables)
+  const nhomHoItems = calcItems('NHOM_HO', nhomHoTables)
+  const nhomHo = { tables: nhomHoTables, items: nhomHoItems, total: nhomHoItems.reduce((s, x) => s + x.total, 0) }
   return { people, peoplePerTable, guestTables, relativeTables, tables, items, itemsTotal, nhomHo, total: itemsTotal + nhomHo.total }
 }
 

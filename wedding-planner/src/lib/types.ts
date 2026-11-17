@@ -20,17 +20,17 @@ export type CateringSetting = {
   peoplePerTable: number
   /** Bàn phát sinh cho họ hàng / khách đi kèm, cộng thêm vào số bàn tiệc cưới */
   relativeTables: number
-  /** Nhóm họ: số bàn và đơn giá 1 bàn (nhập tay) */
+  /** Số bàn nhóm họ (các hạng mục nhóm họ "theo số bàn" lấy số này) */
   nhomHoTables: number
-  nhomHoPricePerTable: number | null
-  /** Nhóm họ: nước uống = số lượng × đơn giá */
-  nhomHoDrinkQty: number
-  nhomHoDrinkPrice: number | null
 }
+
+/** TIEC = tiệc cưới, NHOM_HO = bữa nhóm họ */
+export type CateringGroup = 'TIEC' | 'NHOM_HO'
 
 export type CateringItem = {
   id: string
   side: GuestSide
+  group: CateringGroup
   sortOrder: number
   name: string
   unit: string | null

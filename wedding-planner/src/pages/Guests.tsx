@@ -68,6 +68,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
   return (
     <div>
       <PageTitle
+        eyebrow="Danh sách khách mời"
         right={desktop ? <Btn onClick={() => newRowRef.current?.focus()}>+ Thêm khách</Btn> : undefined}
       >
         Khách mời {title}
@@ -275,7 +276,7 @@ function GuestCard({ g, stt, onOpen }: { g: Guest; stt: number; onOpen: () => vo
       id={g.id}
       whole
       style={{ borderLeft: check ? '4px solid #ED7D31' : undefined }}
-      className="flex items-start gap-2 rounded-2xl border border-[#efe5e9] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition-[scale] active:scale-[.985]"
+      className="flex items-start gap-2 rounded-2xl border border-[#efe2d6] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition-[scale] active:scale-[.985]"
       onClick={onOpen}
     >
       <div className="flex flex-col items-center">

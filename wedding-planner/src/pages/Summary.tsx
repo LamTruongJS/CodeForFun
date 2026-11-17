@@ -4,6 +4,8 @@ import { PageTitle, useIsDesktop } from '../components/Common'
 import { summary, taskCostBySide, type SummaryRow } from '../lib/calc'
 import { fmtDateTime, fmtInt, fmtMoney } from '../lib/format'
 import { useAppStore } from '../store/useAppStore'
+import { Album } from '../components/Album'
+import { HERO_PHOTO, WEDDING_DATE_TEXT, daysUntilWedding } from '../lib/photos'
 
 /** Ý nghĩa con số → màu */
 type Tone = 'count' | 'income' | 'cost' | 'net'
@@ -58,7 +60,7 @@ export function SummaryPage() {
 
   return (
     <div>
-      <PageTitle>Tổng hợp</PageTitle>
+      <PageTitle eyebrow="Tổng quan · 20.12.2026">Tổng hợp</PageTitle>
 
       <Hero net={net} gifts={byStt(4)} cost={byStt(10)} updatedAt={data.updatedAt} />
 
@@ -97,6 +99,8 @@ export function SummaryPage() {
         <QuickLink to="/catering" color="#5E9B37" title="Số bàn" value={`${byStt(6).total} bàn`} />
         <QuickLink to="/tasks" color="#E07020" title="Công việc" value={`${done}/${data.tasks.length} đã làm`} />
       </div>
+
+      <Album />
     </div>
   )
 }
@@ -117,18 +121,26 @@ function Hero({ net, gifts, cost, updatedAt }: { net: SummaryRow; gifts: Summary
         <path d={HEART} />
       </svg>
 
-      <div className="relative grid gap-6 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-center md:gap-10 md:p-8">
+      <div className="relative grid gap-6 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-center md:gap-10 md:p-8 xl:grid-cols-[auto_minmax(0,1fr)_minmax(0,1.05fr)]">
+        {/* Ảnh cưới trong khung vòm (màn lớn) */}
+        <ArchPhoto className="hidden xl:block" />
+
         {/* Bên trái: tên + số còn lại */}
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="font-display text-[19px] font-semibold text-[#f3d9a4] md:text-[22px]">Lâm Trường ♥ Lệ Huyền</span>
-            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-white/70">Cập nhật {fmtDateTime(updatedAt)}</span>
+          <div className="flex items-center gap-3">
+            <img src={HERO_PHOTO.sm} alt="" className="h-14 w-14 shrink-0 rounded-full border-2 border-[#f3d9a4]/70 object-cover object-top shadow-lg xl:hidden" />
+            <div className="min-w-0">
+              <div className="font-display text-[19px] leading-tight font-semibold text-[#f3d9a4] md:text-[22px]">Lâm Trường ♥ Lệ Huyền</div>
+              <Countdown />
+            </div>
           </div>
           <div className="mt-5 text-[12px] font-medium tracking-[0.14em] text-white/65 uppercase">Còn lại sau chi phí</div>
           <div className={`num mt-1 text-[34px] leading-none font-bold tracking-tight md:text-[46px] ${negative ? 'text-[#ffd0d0]' : 'text-white'}`}>
             {money(net.total)}
           </div>
-          <div className="mt-2 text-[13px] text-white/60">Tiền mừng thực tế − Tổng chi phí</div>
+          <div className="mt-2 text-[13px] text-white/60">
+            Tiền mừng thực tế − Tổng chi phí · <span className="text-white/45">cập nhật {fmtDateTime(updatedAt)}</span>
+          </div>
 
           <div className="mt-5 grid max-w-md grid-cols-2 gap-2">
             {(['TRAI', 'GAI'] as const).map((k) => (
@@ -174,6 +186,32 @@ function Hero({ net, gifts, cost, updatedAt }: { net: SummaryRow; gifts: Summary
   )
 }
 
+/** Ảnh cưới trong khung vòm viền vàng. */
+function ArchPhoto({ className = '' }: { className?: string }) {
+  return (
+    <div className={`relative ${className}`}>
+      <div className="h-[250px] w-[180px] overflow-hidden rounded-t-full rounded-b-3xl border-[3px] border-[#f3d9a4]/80 shadow-[0_14px_30px_-10px_rgba(0,0,0,.5)]">
+        <img src={HERO_PHOTO.src} alt="Lâm Trường và Lệ Huyền" className="h-full w-full object-cover object-[50%_18%]" />
+      </div>
+      <svg className="absolute -right-2 -bottom-2 text-[#f3d9a4] drop-shadow" width="34" height="34" viewBox="0 0 24 24" fill="currentColor">
+        <path d={HEART} />
+      </svg>
+    </div>
+  )
+}
+
+/** "Còn X ngày nữa · 20 . 12 . 2026" */
+function Countdown() {
+  const d = daysUntilWedding()
+  const text = d > 0 ? `Còn ${d} ngày nữa` : d === 0 ? 'Hôm nay là ngày cưới 💍' : `Đã cưới được ${-d} ngày`
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[12px]">
+      <span className="rounded-full bg-[#f3d9a4] px-2.5 py-0.5 font-semibold text-[#6b1f37]">{text}</span>
+      <span className="tracking-[0.12em] text-white/70">{WEDDING_DATE_TEXT}</span>
+    </div>
+  )
+}
+
 function HeroStat({ label, value, accent, icon }: { label: string; value: string; accent: string; icon: string }) {
   return (
     <div className="min-w-0 rounded-2xl bg-black/10 px-3 py-2.5 md:px-3.5 md:py-3">
@@ -205,7 +243,7 @@ function MobileRow({ r }: { r: SummaryRow }) {
   const tone = TONE[r.stt]
   return (
     <div
-      className={`rounded-2xl border bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] ${r.highlight ? 'border-[#ecc3cf]' : 'border-[#efe5e9]'}`}
+      className={`rounded-2xl border bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)] ${r.highlight ? 'border-[#ecc3cf]' : 'border-[#efe2d6]'}`}
     >
       <div className={`mb-2 text-[14px] leading-snug ${r.highlight ? 'font-bold text-wine' : 'font-medium text-[#2b2326]'}`}>{r.label}</div>
       <div className="grid grid-cols-[1fr_1fr_1.18fr] gap-1">
@@ -254,7 +292,7 @@ function DesktopCard({
   footer?: SummaryRow
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-[#efe5e9] bg-white shadow-[0_2px_12px_-6px_rgba(80,30,45,.15)]">
+    <section className="overflow-hidden rounded-2xl border border-[#efe2d6] bg-white shadow-[0_2px_12px_-6px_rgba(80,30,45,.15)]">
       <div className="flex items-center justify-between px-5 pt-4 pb-1">
         <GroupTitle icon={group.icon}>{group.title}</GroupTitle>
         {money && <span className="mb-2 text-[12px] text-gray-400">Đơn vị: VNĐ</span>}
@@ -267,7 +305,7 @@ function DesktopCard({
           <col className="w-[21%]" />
         </colgroup>
         <thead>
-          <tr className="border-y border-[#f1e8eb] bg-[#fcf9fa] text-[12px] font-semibold tracking-wide uppercase">
+          <tr className="border-y border-[#f1e8eb] bg-[#faf4ee] text-[12px] font-semibold tracking-wide uppercase">
             <th className="py-2.5 pl-5 text-left text-gray-400">Hạng mục</th>
             {SIDES.map((sd) => (
               <th key={sd.key} className={`py-2.5 pr-5 text-right ${sd.key === 'total' ? 'bg-[#f8eef1]' : ''}`} style={{ color: sd.fg }}>
@@ -299,7 +337,7 @@ function DeskRow({ r, footer }: { r: SummaryRow; footer?: boolean }) {
   const strong = r.highlight
   const rowBg = footer ? (r.total < 0 ? 'bg-[#fdf1f1]' : 'bg-[#eff8f0]') : strong ? 'bg-[#fbf3f5]' : ''
   return (
-    <tr className={`border-t ${footer ? 'border-[#ead9df]' : 'border-[#f3ecef]'} ${rowBg} ${strong || footer ? '' : 'hover:bg-[#fdf9fa]'}`}>
+    <tr className={`border-t ${footer ? 'border-[#ead9df]' : 'border-[#f3ebe3]'} ${rowBg} ${strong || footer ? '' : 'hover:bg-[#fdf9fa]'}`}>
       <td className={`py-3 pl-5 leading-snug ${strong ? 'font-bold text-[#2b2326]' : 'text-[#4a3f43]'}`}>
         {footer ? 'Còn lại (mừng thực tế − tổng chi phí)' : shortLabel(r.label)}
       </td>
@@ -322,7 +360,7 @@ function QuickLink({ to, color, title, value }: { to: string; color: string; tit
   return (
     <Link
       to={to}
-      className="rounded-2xl border border-[#efe5e9] bg-white p-3.5 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition hover:-translate-y-0.5 hover:shadow-md"
+      className="rounded-2xl border border-[#efe2d6] bg-white p-3.5 shadow-[0_1px_3px_rgba(80,30,45,.06)] transition hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="flex items-center gap-1.5 text-[13px] text-gray-500">
         <span className="h-2 w-2 rounded-full" style={{ background: color }} />

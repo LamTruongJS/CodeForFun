@@ -23,14 +23,16 @@ const setting = z.object({
   peoplePerTable: z.number().int().nonnegative().default(10),
   relativeTables: z.number().int().nonnegative().default(0),
   nhomHoTables: z.number().int().nonnegative().default(0),
-  nhomHoPricePerTable: money,
-  nhomHoDrinkQty: z.number().int().nonnegative().default(0),
-  nhomHoDrinkPrice: money,
+  // Trường cũ (bản trước: nhóm họ chỉ có ăn + nước) — đọc để chuyển thành hạng mục
+  nhomHoPricePerTable: z.number().nullable().optional(),
+  nhomHoDrinkQty: z.number().nullable().optional(),
+  nhomHoDrinkPrice: z.number().nullable().optional(),
 })
 
 const item = z.object({
   id: z.string().optional(),
   side: guestSide,
+  group: z.enum(['TIEC', 'NHOM_HO']).default('TIEC'),
   sortOrder: z.number(),
   name,
   unit: nstr,
@@ -84,14 +86,24 @@ export function normalize(input: z.infer<typeof importSchema>): AppData {
       [...g].sort((a, b) => a.sortOrder - b.sortOrder).map((x, i) => ({ ...x, sortOrder: i + 1 })),
     )
   }
-  const settings = (['TRAI', 'GAI'] as const).map(
-    (side) =>
-      input.cateringSettings.find((s) => s.side === side) ?? { side, peoplePerTable: 10, relativeTables: 0, nhomHoTables: 0, nhomHoPricePerTable: null, nhomHoDrinkQty: 0, nhomHoDrinkPrice: null },
-  )
+  const items = input.cateringItems.map((x) => ({ ...x, id: x.id ?? uid() }))
+  const settings = (['TRAI', 'GAI'] as const).map((side) => {
+    const s = input.cateringSettings.find((x) => x.side === side)
+    // Chuyển nhóm họ kiểu cũ (đơn giá 1 bàn / nước uống) thành hạng mục, nếu chưa có hạng mục nhóm họ nào
+    if (s && !items.some((i) => i.side === side && i.group === 'NHOM_HO')) {
+      if (s.nhomHoPricePerTable) {
+        items.push({ id: uid(), side, group: 'NHOM_HO', sortOrder: 1, name: 'Thức ăn', unit: 'Bàn', unitPrice: s.nhomHoPricePerTable, quantityMode: 'AUTO_TABLES', quantity: null })
+      }
+      if (s.nhomHoDrinkQty || s.nhomHoDrinkPrice) {
+        items.push({ id: uid(), side, group: 'NHOM_HO', sortOrder: 2, name: 'Nước uống', unit: null, unitPrice: s.nhomHoDrinkPrice ?? null, quantityMode: 'MANUAL', quantity: s.nhomHoDrinkQty ?? null })
+      }
+    }
+    return { side, peoplePerTable: s?.peoplePerTable ?? 10, relativeTables: s?.relativeTables ?? 0, nhomHoTables: s?.nhomHoTables ?? 0 }
+  })
   return {
     schemaVersion: 1,
     cateringSettings: settings,
-    cateringItems: reorder(input.cateringItems.map((x) => ({ ...x, id: x.id ?? uid() })), (x) => x.side),
+    cateringItems: reorder(items, (x) => `${x.side}:${x.group}`),
     guests: reorder(input.guests.map((x) => ({ ...x, id: x.id ?? uid() })), (x) => x.side),
     tasks: reorder(input.tasks.map((x) => ({ ...x, id: x.id ?? uid() }))),
     updatedAt: input.updatedAt ?? new Date().toISOString(),

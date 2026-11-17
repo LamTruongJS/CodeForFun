@@ -26,7 +26,7 @@ type Actions = {
   addItem: (side: GuestSide, patch: Partial<CateringItem> & { name: string }) => void
   updateItem: (id: string, patch: Partial<CateringItem>) => void
   deleteItem: (id: string) => void
-  reorderItem: (side: GuestSide, activeId: string, overId: string) => void
+  reorderItem: (activeId: string, overId: string) => void
   // công việc
   addTask: (patch: Partial<Task> & { name: string }) => void
   updateTask: (id: string, patch: Partial<Task>) => void
@@ -106,7 +106,8 @@ export const useAppStore = create<State & Actions>()(
               {
                 id: uid(),
                 side,
-                sortOrder: nextOrder(d.cateringItems.filter((i) => i.side === side)),
+                group: patch.group ?? 'TIEC',
+                sortOrder: nextOrder(d.cateringItems.filter((i) => i.side === side && i.group === (patch.group ?? 'TIEC'))),
                 unit: null,
                 unitPrice: null,
                 quantityMode: 'MANUAL',
@@ -119,18 +120,18 @@ export const useAppStore = create<State & Actions>()(
           mut((d) => ({ cateringItems: d.cateringItems.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),
         deleteItem: (id) =>
           mut((d) => {
-            const target = d.cateringItems.find((i) => i.id === id)
+            const t = d.cateringItems.find((i) => i.id === id)
+            if (!t) return {}
             const rest = d.cateringItems.filter((i) => i.id !== id)
-            if (!target) return {}
-            return {
-              cateringItems: [
-                ...rest.filter((i) => i.side !== target.side),
-                ...renumber(rest.filter((i) => i.side === target.side)),
-              ],
-            }
+            const same = (i: CateringItem) => i.side === t.side && i.group === t.group
+            return { cateringItems: [...rest.filter((i) => !same(i)), ...renumber(rest.filter(same))] }
           }),
-        reorderItem: (side, a, o) =>
-          mut((d) => ({ cateringItems: reorder(d.cateringItems, (i) => i.side === side, a, o) })),
+        reorderItem: (a, o) =>
+          mut((d) => {
+            const t = d.cateringItems.find((i) => i.id === a)
+            if (!t) return {}
+            return { cateringItems: reorder(d.cateringItems, (i) => i.side === t.side && i.group === t.group, a, o) }
+          }),
 
         addTask: (patch) =>
           mut((d) => ({

@@ -5,22 +5,22 @@ import { InlineNumber, InlineText } from '../components/Inline'
 import { DragHandle, DragPreview, SortableItem, SortableList } from '../components/Sortable'
 import { cateringForSide } from '../lib/calc'
 import { fmtInt, fmtMoney } from '../lib/format'
-import type { CateringItem, GuestSide } from '../lib/types'
+import type { CateringGroup, CateringItem, GuestSide } from '../lib/types'
 import { confirmDialog, toast } from '../store/ui'
 import { useAppStore } from '../store/useAppStore'
 
-const FIELDS: FieldDef[] = [
+const fieldsFor = (group: CateringGroup): FieldDef[] => [
   { key: 'name', label: 'Hạng mục', type: 'text', required: true, placeholder: 'VD: Bia', half: true },
   { key: 'unit', label: 'Đơn vị tính', type: 'text', placeholder: 'VD: Thùng', half: true },
   { key: 'unitPrice', label: 'Đơn giá', type: 'number', variant: 'money' },
-  { key: 'auto', label: 'Tự lấy theo số bàn', type: 'toggle', hint: 'Số lượng = số bàn dự kiến' },
+  { key: 'auto', label: 'Tự lấy theo số bàn', type: 'toggle', hint: group === 'NHOM_HO' ? 'Số lượng = số bàn nhóm họ' : 'Số lượng = số bàn dự kiến' },
   { key: 'quantity', label: 'Số lượng', type: 'number', disabledWhen: (v) => Boolean(v.auto) },
 ]
 
 export function CateringPage() {
   return (
     <div>
-      <PageTitle>Khẩu phần ăn</PageTitle>
+      <PageTitle eyebrow="Tiệc cưới · nhóm họ">Khẩu phần ăn</PageTitle>
       <div className="grid gap-5">
         <Section side="TRAI" />
         <Section side="GAI" />
@@ -33,10 +33,11 @@ type Calc = ReturnType<typeof cateringForSide>['items'][number]
 
 function Section({ side }: { side: GuestSide }) {
   const data = useAppStore((s) => s.data)
-  const { updateSetting, addItem, updateItem, deleteItem, reorderItem } = useAppStore()
-  const desktop = useIsDesktop()
+  const { updateSetting, addItem, updateItem, deleteItem } = useAppStore()
   const c = useMemo(() => cateringForSide(data, side), [data, side])
-  const [sheet, setSheet] = useState<CateringItem | 'new' | null>(null)
+  // null = đóng; 'TIEC' / 'NHOM_HO' = thêm mới vào nhóm đó; CateringItem = sửa
+  const [sheet, setSheet] = useState<CateringItem | CateringGroup | null>(null)
+  const sheetGroup: CateringGroup = sheet == null ? 'TIEC' : typeof sheet === 'string' ? sheet : sheet.group
   const label = side === 'TRAI' ? 'NHÀ TRAI' : 'NHÀ GÁI'
   const theme = THEME[side]
 
@@ -50,7 +51,7 @@ function Section({ side }: { side: GuestSide }) {
     updateItem(it.id, { quantityMode: auto ? 'AUTO_TABLES' : 'MANUAL' })
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-[#efe5e9] bg-white shadow-[0_2px_12px_-4px_rgba(80,30,45,.12)]">
+    <section className="overflow-hidden rounded-3xl border border-[#efe2d6] bg-white shadow-[0_2px_12px_-4px_rgba(80,30,45,.12)]">
       <h2
         className="flex items-center justify-center gap-2 px-4 py-3 font-display text-lg font-bold tracking-wide"
         style={{ background: theme.headBg, color: theme.fg }}
@@ -80,112 +81,35 @@ function Section({ side }: { side: GuestSide }) {
       </div>
 
       <SubTitle>Tiệc cưới</SubTitle>
+      <ItemsBlock
+        items={c.items}
+        totalLabel="Cộng tiệc cưới"
+        total={c.itemsTotal}
+        onToggle={toggleAuto}
+        onOpen={setSheet}
+        onDelete={askDelete}
+        onAdd={() => setSheet('TIEC')}
+      />
 
-      <SortableList
-        ids={c.items.map((x) => x.item.id)}
-        onMove={(a, o) => reorderItem(side, a, o)}
-        overlay={
-          desktop
-            ? undefined
-            : (id) => {
-                const i = c.items.findIndex((x) => x.item.id === id)
-                const x = c.items[i]
-                return <DragPreview stt={i + 1} title={x.item.name} sub={x.item.unit ?? undefined} />
-              }
-        }
-      >
-        {desktop ? (
-          <div className="overflow-x-auto px-3">
-            <table className="tbl table-fixed min-w-[760px]">
-              <colgroup>
-                <col className="w-[64px]" />
-                <col />
-                <col className="w-[110px]" />
-                <col className="w-[150px]" />
-                <col className="w-[210px]" />
-                <col className="w-[160px]" />
-                <col className="w-12" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>STT</th>
-                  <th className="text-left">Hạng mục</th>
-                  <th className="text-left">ĐVT</th>
-                  <th className="text-right">Đơn giá (VNĐ)</th>
-                  <th>Số lượng</th>
-                  <th className="text-right">Thành tiền (VNĐ)</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {c.items.map((x, i) => (
-                  <ItemRow
-                    key={x.item.id}
-                    x={x}
-                    stt={i + 1}
-                    onPatch={(p) => updateItem(x.item.id, p)}
-                    onToggle={(a) => toggleAuto(x.item, a)}
-                    onDelete={() => askDelete(x.item)}
-                  />
-                ))}
-                <tr className="total">
-                  <td colSpan={5} className="px-3 py-2.5 text-wine">
-                    Cộng tiệc cưới
-                  </td>
-                  <td className="num px-2 py-2.5 text-right text-wine">{fmtMoney(c.itemsTotal)}</td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="space-y-2 px-3">
-            {c.items.map((x, i) => (
-              <ItemCard key={x.item.id} x={x} stt={i + 1} onPatch={(p) => updateItem(x.item.id, p)} onToggle={(a) => toggleAuto(x.item, a)} onOpen={() => setSheet(x.item)} />
-            ))}
-            <div className="flex items-center justify-between rounded-2xl bg-blush px-4 py-3 text-wine">
-              <span className="text-[13px] font-semibold">Cộng tiệc cưới</span>
-              <span className="num text-lg font-bold">{fmtMoney(c.itemsTotal)}</span>
-            </div>
-          </div>
-        )}
-      </SortableList>
-
-      <div className="p-3">
-        <button onClick={() => setSheet('new')} className="h-11 w-full rounded-2xl border-[1.5px] border-dashed border-[#b9d6a5] font-medium text-[#4d7d2f] transition hover:bg-green-50">
-          + Thêm hạng mục
-        </button>
+      <div className="mt-2 flex flex-wrap items-end justify-between gap-2 px-4 pb-2">
+        <h3 className="text-[11.5px] font-semibold tracking-[0.24em] text-gold uppercase">Nhóm họ</h3>
+        <label className="flex items-center gap-2 text-[13px] text-gray-600">
+          Số bàn nhóm họ
+          <span className="w-20 rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
+            <InlineNumber value={c.nhomHo.tables || null} placeholder="0" className="!text-center" onSave={(v) => updateSetting(side, { nhomHoTables: v ?? 0 })} />
+          </span>
+        </label>
       </div>
-
-      <SubTitle>Nhóm họ</SubTitle>
-      <div className="px-3">
-        <div className="divide-y divide-[#f3ecef] rounded-2xl border border-[#efe5e9]">
-          <NhomHoLine
-            title="Ăn"
-            qtyLabel="Số bàn"
-            priceLabel="Đơn giá 1 bàn (VNĐ)"
-            qty={c.nhomHo.tables}
-            price={c.nhomHo.pricePerTable}
-            total={c.nhomHo.foodTotal}
-            onQty={(v) => updateSetting(side, { nhomHoTables: v ?? 0 })}
-            onPrice={(v) => updateSetting(side, { nhomHoPricePerTable: v })}
-          />
-          <NhomHoLine
-            title="Nước uống"
-            qtyLabel="Số lượng"
-            priceLabel="Đơn giá (VNĐ)"
-            qty={c.nhomHo.drinkQty}
-            price={c.nhomHo.drinkPrice}
-            total={c.nhomHo.drinkTotal}
-            onQty={(v) => updateSetting(side, { nhomHoDrinkQty: v ?? 0 })}
-            onPrice={(v) => updateSetting(side, { nhomHoDrinkPrice: v })}
-          />
-          <div className="flex items-center justify-between rounded-b-2xl bg-blush px-3 py-2.5 text-wine">
-            <span className="text-[13px] font-semibold">Cộng nhóm họ</span>
-            <span className="num text-lg font-bold">{fmtMoney(c.nhomHo.total)}</span>
-          </div>
-        </div>
-      </div>
+      <ItemsBlock
+        items={c.nhomHo.items}
+        totalLabel="Cộng nhóm họ"
+        total={c.nhomHo.total}
+        onToggle={toggleAuto}
+        onOpen={setSheet}
+        onDelete={askDelete}
+        onAdd={() => setSheet('NHOM_HO')}
+        empty="Chưa có hạng mục nhóm họ — bấm “+ Thêm hạng mục” (VD: Thức ăn theo số bàn, Bia, Nước ngọt, Nước suối…)"
+      />
 
       <div className="p-3">
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-[#9b3352] to-[#7d2640] px-4 py-3.5 text-white shadow-md shadow-wine/20">
@@ -199,17 +123,17 @@ function Section({ side }: { side: GuestSide }) {
 
       {sheet && (
         <EditDialog
-          title={sheet === 'new' ? `Thêm hạng mục ${label}` : 'Sửa hạng mục'}
-          fields={FIELDS}
+          title={typeof sheet === 'string' ? `Thêm hạng mục ${sheet === 'NHOM_HO' ? 'nhóm họ' : 'tiệc cưới'} · ${label}` : 'Sửa hạng mục'}
+          fields={fieldsFor(sheetGroup)}
           initial={
-            sheet === 'new'
+            typeof sheet === 'string'
               ? { auto: false }
               : { name: sheet.name, unit: sheet.unit, unitPrice: sheet.unitPrice, quantity: sheet.quantity, auto: sheet.quantityMode === 'AUTO_TABLES' }
           }
           onClose={() => setSheet(null)}
-          onDelete={sheet === 'new' ? undefined : () => askDelete(sheet)}
+          onDelete={typeof sheet === 'string' ? undefined : () => askDelete(sheet)}
           extra={(v) =>
-            v.auto ? <div className="text-[13px] text-gray-500">Hiện tại: {c.tables} bàn</div> : null
+            v.auto ? <div className="text-[13px] text-gray-500">Hiện tại: {sheetGroup === 'NHOM_HO' ? c.nhomHo.tables : c.tables} bàn</div> : null
           }
           onSave={(v) => {
             const patch: Partial<CateringItem> & { name: string } = {
@@ -219,7 +143,7 @@ function Section({ side }: { side: GuestSide }) {
               quantityMode: v.auto ? 'AUTO_TABLES' : 'MANUAL',
               ...(v.auto ? {} : { quantity: v.quantity as number | null }),
             }
-            if (sheet === 'new') addItem(side, patch)
+            if (typeof sheet === 'string') addItem(side, { ...patch, group: sheet })
             else updateItem(sheet.id, patch)
             setSheet(null)
             toast('Đã lưu', 'success')
@@ -282,52 +206,117 @@ function EditStat({ label, value, required, title, onSave }: { label: string; va
   )
 }
 
-/** 1 dòng chi phí nhóm họ: số lượng × đơn giá = thành tiền */
-function NhomHoLine({
-  title,
-  qtyLabel,
-  priceLabel,
-  qty,
-  price,
+/** Danh sách hạng mục (bảng trên máy tính, thẻ trên điện thoại) + dòng cộng + nút thêm. */
+function ItemsBlock({
+  items,
+  totalLabel,
   total,
-  onQty,
-  onPrice,
+  onToggle,
+  onOpen,
+  onDelete,
+  onAdd,
+  empty,
 }: {
-  title: string
-  qtyLabel: string
-  priceLabel: string
-  qty: number
-  price: number | null
+  items: Calc[]
+  totalLabel: string
   total: number
-  onQty: (v: number | null) => void
-  onPrice: (v: number | null) => void
+  onToggle: (it: CateringItem, auto: boolean) => void
+  onOpen: (it: CateringItem) => void
+  onDelete: (it: CateringItem) => void
+  onAdd: () => void
+  empty?: string
 }) {
+  const { updateItem, reorderItem } = useAppStore()
+  const desktop = useIsDesktop()
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-x-2 gap-y-1.5 p-3 md:grid-cols-[110px_minmax(0,170px)_auto_minmax(0,210px)_1fr] md:gap-x-3">
-      <div className="col-span-3 text-[13px] font-semibold text-[#2b2326] md:col-span-1 md:pb-2">{title}</div>
-      <label className="block">
-        <span className="text-xs text-gray-500">{qtyLabel}</span>
-        <div className="rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
-          <InlineNumber value={qty || null} placeholder="0" onSave={onQty} />
-        </div>
-      </label>
-      <span className="pb-2 text-gray-400">×</span>
-      <label className="block">
-        <span className="text-xs text-gray-500">{priceLabel}</span>
-        <div className="rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
-          <InlineNumber value={price} placeholder="0" onSave={onPrice} />
-        </div>
-      </label>
-      <div className="col-span-3 flex items-baseline justify-between gap-1.5 text-[13px] text-gray-500 md:col-span-1 md:flex-col md:items-end md:justify-end md:gap-0">
-        Thành tiền
-        <b className={`num text-[17px] ${total ? 'text-wine' : 'font-medium text-[#c9bec2]'}`}>{fmtMoney(total)}</b>
+    <>
+      <SortableList
+        ids={items.map((x) => x.item.id)}
+        onMove={reorderItem}
+        overlay={
+          desktop
+            ? undefined
+            : (id) => {
+                const i = items.findIndex((x) => x.item.id === id)
+                return <DragPreview stt={i + 1} title={items[i].item.name} sub={items[i].item.unit ?? undefined} />
+              }
+        }
+      >
+        {desktop ? (
+          <div className="overflow-x-auto px-3">
+            <table className="tbl table-fixed min-w-[760px]">
+              <colgroup>
+                <col className="w-[64px]" />
+                <col />
+                <col className="w-[110px]" />
+                <col className="w-[150px]" />
+                <col className="w-[210px]" />
+                <col className="w-[160px]" />
+                <col className="w-12" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th className="text-left">Hạng mục</th>
+                  <th className="text-left">ĐVT</th>
+                  <th className="text-right">Đơn giá (VNĐ)</th>
+                  <th>Số lượng</th>
+                  <th className="text-right">Thành tiền (VNĐ)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.length === 0 && empty && (
+                  <tr>
+                    <td colSpan={7} className="px-3 py-5 text-center text-[13px] text-gray-400">
+                      {empty}
+                    </td>
+                  </tr>
+                )}
+                {items.map((x, i) => (
+                  <ItemRow
+                    key={x.item.id}
+                    x={x}
+                    stt={i + 1}
+                    onPatch={(p) => updateItem(x.item.id, p)}
+                    onToggle={(a) => onToggle(x.item, a)}
+                    onDelete={() => onDelete(x.item)}
+                  />
+                ))}
+                <tr className="total">
+                  <td colSpan={5} className="px-3 py-2.5 text-wine">
+                    {totalLabel}
+                  </td>
+                  <td className="num px-2 py-2.5 text-right text-wine">{fmtMoney(total)}</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="space-y-2 px-3">
+            {items.length === 0 && empty && <div className="rounded-2xl border border-dashed border-[#e6d3c0] px-4 py-4 text-center text-[13px] text-gray-400">{empty}</div>}
+            {items.map((x, i) => (
+              <ItemCard key={x.item.id} x={x} stt={i + 1} onPatch={(p) => updateItem(x.item.id, p)} onToggle={(a) => onToggle(x.item, a)} onOpen={() => onOpen(x.item)} />
+            ))}
+            <div className="flex items-center justify-between rounded-2xl bg-blush px-4 py-3 text-wine">
+              <span className="text-[13px] font-semibold">{totalLabel}</span>
+              <span className="num text-lg font-bold">{fmtMoney(total)}</span>
+            </div>
+          </div>
+        )}
+      </SortableList>
+      <div className="p-3">
+        <button onClick={onAdd} className="h-11 w-full rounded-2xl border-[1.5px] border-dashed border-[#dcc4a0] font-medium text-[#9a7432] transition hover:bg-[#fbf3e8]">
+          + Thêm hạng mục
+        </button>
       </div>
-    </div>
+    </>
   )
 }
 
 function SubTitle({ children }: { children: ReactNode }) {
-  return <h3 className="px-4 pt-1 pb-2 text-[12px] font-semibold tracking-[0.12em] text-wine/80 uppercase">{children}</h3>
+  return <h3 className="px-4 pt-1 pb-2 text-[11.5px] font-semibold tracking-[0.24em] text-gold uppercase">{children}</h3>
 }
 
 function AutoSwitch({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -393,12 +382,12 @@ function ItemRow({ x, stt, onPatch, onToggle, onDelete }: RowProps & { onDelete:
 function ItemCard({ x, stt, onPatch, onToggle, onOpen }: RowProps & { onOpen: () => void }) {
   const auto = x.item.quantityMode === 'AUTO_TABLES'
   return (
-    <SortableItem id={x.item.id} className="rounded-2xl border border-[#efe5e9] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)]">
+    <SortableItem id={x.item.id} className="rounded-2xl border border-[#efe2d6] bg-white p-3 shadow-[0_1px_3px_rgba(80,30,45,.06)]">
       <div className="flex items-center gap-2">
         <DragHandle />
         <span className="num text-xs text-gray-400">{stt}</span>
         <span className="font-semibold text-[#2b2326]">{x.item.name}</span>
-        {x.item.unit && <span className="rounded-full bg-[#f3ecef] px-2 py-0.5 text-[12px] text-gray-500">{x.item.unit}</span>}
+        {x.item.unit && <span className="rounded-full bg-[#f3ebe3] px-2 py-0.5 text-[12px] text-gray-500">{x.item.unit}</span>}
         <button
           type="button"
           onClick={onOpen}

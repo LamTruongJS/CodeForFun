@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../store/ui'
 import { ConfirmHost, ToastHost } from './Common'
 import { SaveIndicator, SyncGate } from './SyncGate'
+import { HERO_PHOTO } from '../lib/photos'
 import { flushNow, stopSync } from '../store/sync'
 
 const I = ({ d }: { d: ReactNode }) => (
@@ -67,24 +68,30 @@ export function Layout() {
   }
   return (
     <div className="min-h-dvh">
-      <header className="sticky top-0 z-30 h-[56px] border-b border-[#f0e4e8] bg-white/85 backdrop-blur-md md:h-[64px]">
+      {/* Nền: quầng hồng + vàng nhạt như trang đăng nhập */}
+      <div className="pointer-events-none fixed -top-48 -left-48 -z-10 h-[560px] w-[560px] rounded-full bg-[#f6dbe3] opacity-50 blur-3xl" />
+      <div className="pointer-events-none fixed -right-40 -bottom-48 -z-10 h-[600px] w-[600px] rounded-full bg-[#f3e2c2] opacity-50 blur-3xl" />
+
+      <header className="sticky top-0 z-30 h-[60px] border-b border-[#eee0d2] bg-[#fbf6f1]/85 backdrop-blur-md md:h-[64px]">
         <div className="mx-auto flex h-full max-w-7xl items-center gap-3 px-4 md:px-6 2xl:max-w-[1600px] 2xl:px-8">
-          <div className="flex items-center gap-2 whitespace-nowrap">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#b4466a] to-[#7d2640] text-white shadow-sm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.9 4.5 6.6 4.5c2.1 0 3.5 1.1 4.4 2.4h2c.9-1.3 2.3-2.4 4.4-2.4 3.7 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21Z" />
-              </svg>
+          <NavLink to="/" className="flex min-w-0 items-center gap-2.5 whitespace-nowrap">
+            <img src={HERO_PHOTO.sm} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover object-[50%_20%] ring-2 ring-gold-soft ring-offset-2 ring-offset-[#fbf6f1]" />
+            <span className="min-w-0 leading-tight">
+              <span className="block font-display text-[16px] font-bold text-wine md:text-[17px]">Lâm Trường &amp; Lệ Huyền</span>
+              <span className="block text-[9.5px] font-semibold tracking-[0.28em] text-gold uppercase">Kế hoạch đám cưới</span>
             </span>
-            <span className="font-display text-lg font-bold text-wine md:text-xl">Kế hoạch đám cưới</span>
-          </div>
-          <nav className="ml-6 hidden flex-1 gap-1 md:flex">
+          </NavLink>
+          <nav className="ml-4 hidden flex-1 gap-1 md:flex lg:ml-8">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
                 end={n.to === '/'}
-                className="rounded-full px-3.5 py-1.5 text-[14px] font-medium whitespace-nowrap transition-colors hover:bg-black/[.04]"
-                style={({ isActive }) => (isActive ? { background: n.color, color: '#fff' } : { color: '#5b4d52' })}
+                className={({ isActive }) =>
+                  `rounded-full px-3.5 py-1.5 text-[14px] font-medium whitespace-nowrap transition-colors ${
+                    isActive ? 'bg-wine text-white shadow-[0_4px_12px_-4px_rgba(142,44,72,.6)]' : 'text-[#5b4d52] hover:bg-[#f3e7da]'
+                  }`
+                }
               >
                 {n.label}
               </NavLink>
@@ -114,7 +121,7 @@ export function Layout() {
       </main>
 
       {/* Thanh điều hướng dưới cùng cho điện thoại */}
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-[#f0e4e8] bg-white/95 backdrop-blur-md md:hidden">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-[#eee0d2] bg-[#fbf6f1]/95 backdrop-blur-md md:hidden">
         <div className="grid grid-cols-6">
           {NAV.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.to === '/'} className="flex flex-col items-center gap-0.5 pt-2 pb-1.5">
@@ -122,11 +129,11 @@ export function Layout() {
                 <>
                   <span
                     className="flex h-8 w-12 items-center justify-center rounded-full transition-colors"
-                    style={{ background: isActive ? n.color + '1f' : 'transparent', color: isActive ? n.color : '#9a8d92' }}
+                    style={{ background: isActive ? '#8e2c481a' : 'transparent', color: isActive ? '#8e2c48' : '#9a8d92' }}
                   >
                     {n.icon}
                   </span>
-                  <span className="text-[10.5px] leading-tight" style={{ color: isActive ? n.color : '#8a7d82', fontWeight: isActive ? 600 : 400 }}>
+                  <span className="text-[10.5px] leading-tight" style={{ color: isActive ? '#8e2c48' : '#8a7d82', fontWeight: isActive ? 600 : 400 }}>
                     {n.short}
                   </span>
                 </>

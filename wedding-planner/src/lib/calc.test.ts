@@ -13,7 +13,7 @@ import {
 } from './calc'
 import { formatTyping, parseIntInput } from './format'
 import { parseImport } from './schema'
-import type { AppData, Guest, Task } from './types'
+import type { AppData, CateringItem, Guest, Task } from './types'
 
 const load = (): AppData => {
   const r = parseImport(seed)
@@ -132,7 +132,7 @@ describe('bàn họ hàng và nhóm họ', () => {
   it('dữ liệu cũ (không có trường mới) mặc định 0 bàn họ hàng, 0 nhóm họ', () => {
     const c = cateringForSide(load(), 'GAI')
     expect(c.relativeTables).toBe(0)
-    expect(c.nhomHo).toEqual({ tables: 0, pricePerTable: null, foodTotal: 0, drinkQty: 0, drinkPrice: null, drinkTotal: 0, total: 0 })
+    expect(c.nhomHo).toEqual({ tables: 0, items: [], total: 0 })
   })
 
   it('bàn họ hàng cộng vào số bàn tiệc cưới, món theo số bàn tự tăng', () => {
@@ -142,27 +142,53 @@ describe('bàn họ hàng và nhóm họ', () => {
     expect(c.itemsTotal).toBe(12_000_000)
   })
 
-  it('nhóm họ = số bàn × đơn giá, cộng vào tổng và Tổng hợp', () => {
-    const d = withSetting(load(), { nhomHoTables: 4, nhomHoPricePerTable: 1_500_000 })
+  const nh = (p: Partial<CateringItem>): CateringItem => ({
+    id: Math.random().toString(),
+    side: 'GAI',
+    group: 'NHOM_HO',
+    sortOrder: 1,
+    name: 'Món',
+    unit: null,
+    unitPrice: null,
+    quantityMode: 'MANUAL',
+    quantity: null,
+    ...p,
+  })
+
+  it('nhóm họ: nhiều hạng mục, "theo số bàn" lấy số bàn nhóm họ, không lẫn vào tiệc cưới', () => {
+    const base = withSetting(load(), { nhomHoTables: 4 })
+    const d = {
+      ...base,
+      cateringItems: [
+        ...base.cateringItems,
+        nh({ name: 'Thức ăn', unitPrice: 1_500_000, quantityMode: 'AUTO_TABLES' }),
+        nh({ name: 'Bia', unitPrice: 350_000, quantity: 6, sortOrder: 2 }),
+        nh({ name: 'Nước ngọt', unitPrice: 200_000, quantity: 3, sortOrder: 3 }),
+      ],
+    }
     const c = cateringForSide(d, 'GAI')
-    expect(c.nhomHo.total).toBe(6_000_000)
-    expect(c.total).toBe(9_000_000 + 6_000_000)
+    expect(c.nhomHo.items.map((x) => x.item.name)).toEqual(['Thức ăn', 'Bia', 'Nước ngọt'])
+    expect(c.nhomHo.total).toBe(6_000_000 + 2_100_000 + 600_000)
+    expect(c.itemsTotal).toBe(9_000_000) // tiệc cưới không đổi
+    expect(c.total).toBe(9_000_000 + 8_700_000)
     const s = summary(d)
-    expect(s[7].GAI).toBe(6_000_000) // Chi phí nhóm họ
+    expect(s[7].GAI).toBe(8_700_000)
     expect(s[9].GAI).toBe(s[6].GAI + s[7].GAI + s[8].GAI)
   })
 
-  it('nhóm họ có cả nước uống: ăn + nước', () => {
-    const d = withSetting(load(), { nhomHoTables: 4, nhomHoPricePerTable: 1_500_000, nhomHoDrinkQty: 10, nhomHoDrinkPrice: 350_000 })
-    const c = cateringForSide(d, 'GAI')
-    expect(c.nhomHo.foodTotal).toBe(6_000_000)
-    expect(c.nhomHo.drinkTotal).toBe(3_500_000)
-    expect(c.nhomHo.total).toBe(9_500_000)
-    expect(summary(d)[7].GAI).toBe(9_500_000)
-  })
-
-  it('nhóm họ chưa nhập đơn giá → 0', () => {
-    expect(cateringForSide(withSetting(load(), { nhomHoTables: 4 }), 'GAI').nhomHo.total).toBe(0)
+  it('dữ liệu cũ (đơn giá 1 bàn + nước) tự chuyển thành hạng mục nhóm họ', () => {
+    const raw = structuredClone(seed) as unknown as { cateringSettings: Record<string, unknown>[] }
+    raw.cateringSettings = raw.cateringSettings.map((s) =>
+      s.side === 'TRAI' ? { ...s, nhomHoTables: 5, nhomHoPricePerTable: 1_500_000, nhomHoDrinkQty: 10, nhomHoDrinkPrice: 350_000 } : s,
+    )
+    const r = parseImport(raw)
+    if (!r.ok) throw new Error(r.error)
+    const c = cateringForSide(r.data, 'TRAI')
+    expect(c.nhomHo.items.map((x) => [x.item.name, x.quantity, x.total])).toEqual([
+      ['Thức ăn', 5, 7_500_000],
+      ['Nước uống', 10, 3_500_000],
+    ])
+    expect(r.data.cateringSettings.find((s) => s.side === 'TRAI')).toEqual({ side: 'TRAI', peoplePerTable: 10, relativeTables: 0, nhomHoTables: 5 })
   })
 })
 

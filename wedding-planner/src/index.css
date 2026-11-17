@@ -2,14 +2,18 @@
 
 @theme {
   --font-sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-display: 'Playfair Display', 'Times New Roman', 'Noto Serif', serif; /* dự phòng có đủ dấu tiếng Việt */
   --color-wine-dark: #6f1f37;
   --color-wine: #8e2c48;
   --color-blush: #f8e5ea;
   --color-rose: #f3d3dc;
-  --color-line: #e2d7db;
+  --color-line: #ebe0d5;
+  --color-cream: #fbf6f1;
+  --color-gold: #b08a43;
+  --color-gold-soft: #d9b87a;
+  --color-sand: #efe2d6;
   --color-input: #fff2cc;
-  --color-calc: #eeeeee;
+  --color-calc: #f3eee9;
 }
 
 html,
@@ -17,7 +21,7 @@ body {
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.5;
-  background: #faf6f7;
+  background: #fbf6f1;
   color: #2b2326;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -49,14 +53,15 @@ body {
   position: sticky;
   top: 0;
   z-index: 3;
-  background: var(--color-wine);
-  color: #fff;
+  background: #f6ece2;
+  color: #7d2640;
   font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.01em;
-  padding: 10px 8px;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  padding: 11px 8px;
   text-align: center;
   border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid #e3cfb2;
   white-space: nowrap;
 }
 .tbl td.pad {
