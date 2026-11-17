@@ -28,7 +28,7 @@ Dữ liệu **không lưu trong trình duyệt nữa** mà lưu ở server, dùn
 | Chạy local (`npm run dev`) | Ghi thẳng vào **`src/data/seed-data.json`**. Nếu `.env.local` có biến Upstash (xem dưới) thì dùng chung dữ liệu với web thật. |
 
 - Mỗi thay đổi (thêm / sửa / xóa / kéo thả) **tự lưu sau ~0,6 giây**; góc trên có chỉ báo *Đang lưu… / Đã lưu*.
-- Máy khác đang mở web sẽ **tự thấy thay đổi trong vòng ~4 giây** (và ngay khi quay lại tab).
+- Máy khác đang mở web sẽ **tự thấy thay đổi trong vòng ~1 phút**, và ngay lập tức khi quay lại tab hoặc chạm vào app sau khi nghỉ. Không ai thao tác quá 3 phút thì ngừng hỏi server.
 - Hai người sửa gần như cùng lúc: người lưu sau được báo *“Có người khác vừa sửa trước”*, web tải bản mới nhất về và thao tác vừa rồi cần làm lại — không ai bị ghi đè mất dữ liệu.
 - Lần đầu server còn trống: web đưa dữ liệu cũ trong trình duyệt (bản trước đây lưu localStorage) lên, nếu không có thì dùng `seed-data.json`. → **Mở web lần đầu trên máy đang có dữ liệu mới nhất.**
 - Trang **Dữ liệu** vẫn có Xuất JSON (sao lưu), Nhập JSON và Khôi phục dữ liệu gốc — áp dụng cho tất cả mọi người.

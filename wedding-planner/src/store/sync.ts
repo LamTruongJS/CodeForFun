@@ -16,7 +16,7 @@ import { toast, useAuth } from './ui'
  */
 
 const SAVE_DELAY = 600
-const POLL_MS = 4000
+const POLL_MS = 60 * 1000 // 1 phút
 const RETRY_MS = 5000
 const IDLE_MS = 3 * 60 * 1000
 
