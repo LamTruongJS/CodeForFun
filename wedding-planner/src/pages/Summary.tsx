@@ -2,7 +2,7 @@ import { useMemo, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { PageTitle, useIsDesktop } from '../components/Common'
 import { summary, taskCostBySide, type SummaryRow } from '../lib/calc'
-import { fmtInt, fmtMoney } from '../lib/format'
+import { fmtDateTime, fmtInt, fmtMoney } from '../lib/format'
 import { useAppStore } from '../store/useAppStore'
 
 /** Ý nghĩa con số → màu */
@@ -60,23 +60,7 @@ export function SummaryPage() {
     <div>
       <PageTitle>Tổng hợp</PageTitle>
 
-      {/* Thẻ nổi bật */}
-      <div className="relative mb-4 overflow-hidden rounded-3xl bg-gradient-to-br from-[#a8385a] via-[#8e2c48] to-[#5e1a2f] p-5 text-white shadow-[0_12px_30px_-12px_rgba(142,44,72,.6)]">
-        <svg className="absolute -top-6 -right-6 opacity-10" width="150" height="150" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.9 4.5 6.6 4.5c2.1 0 3.5 1.1 4.4 2.4h2c.9-1.3 2.3-2.4 4.4-2.4 3.7 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21Z" />
-        </svg>
-        <div className="font-display text-[17px] font-semibold text-[#f3d9a4]">Lâm Trường ♥ Lệ Huyền</div>
-        <div className="mt-3 text-[12px] tracking-wide text-white/70 uppercase">Tiền mừng thực tế − Tổng chi phí</div>
-        <div className="num mt-0.5 text-[30px] leading-tight font-bold">{net.total === 0 ? '0' : fmt(net, net.total)}</div>
-        <div className="mt-3 grid grid-cols-2 gap-2 md:max-w-md">
-          {(['TRAI', 'GAI'] as const).map((k) => (
-            <div key={k} className="rounded-2xl bg-white/12 px-3 py-2 backdrop-blur-sm">
-              <div className="text-[11px] text-white/70">{k === 'TRAI' ? 'Nhà Trai' : 'Nhà Gái'}</div>
-              <div className={`num text-[15px] font-semibold ${net[k] < 0 ? 'text-[#ffc1c1]' : ''}`}>{net[k] === 0 ? '0' : fmt(net, net[k])}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Hero net={net} gifts={byStt(4)} cost={byStt(10)} updatedAt={data.updatedAt} />
 
       {unassigned > 0 && (
         <Link to="/tasks" className="mb-4 flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-amber-900">
@@ -112,6 +96,95 @@ export function SummaryPage() {
         <QuickLink to="/guests/gai" color="#C0504D" title="Khách Nhà Gái" value={`${byStt(1).GAI} thiệp mời`} />
         <QuickLink to="/catering" color="#5E9B37" title="Số bàn" value={`${byStt(6).total} bàn`} />
         <QuickLink to="/tasks" color="#E07020" title="Công việc" value={`${done}/${data.tasks.length} đã làm`} />
+      </div>
+    </div>
+  )
+}
+
+const HEART = 'M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.9 4.5 6.6 4.5c2.1 0 3.5 1.1 4.4 2.4h2c.9-1.3 2.3-2.4 4.4-2.4 3.7 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21Z'
+
+/** Thẻ nổi bật đầu trang: còn lại sau chi phí + tiền mừng / chi phí + mức bù chi phí. */
+function Hero({ net, gifts, cost, updatedAt }: { net: SummaryRow; gifts: SummaryRow; cost: SummaryRow; updatedAt: string }) {
+  const money = (v: number) => (v === 0 ? '0' : fmt(net, v))
+  const pct = cost.total > 0 ? Math.min(100, Math.round((gifts.total / cost.total) * 100)) : gifts.total > 0 ? 100 : 0
+  const negative = net.total < 0
+  return (
+    <section className="relative mb-5 overflow-hidden rounded-[28px] bg-[#7d2640] text-white shadow-[0_18px_40px_-18px_rgba(110,30,55,.7)]">
+      {/* nền: gradient + quầng sáng + trái tim mờ */}
+      <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_0%_0%,#b84a6c_0%,#8e2c48_45%,#5a1830_100%)]" />
+      <div className="absolute -top-24 right-[-60px] h-72 w-72 rounded-full bg-[#f3d9a4]/10 blur-2xl" />
+      <svg className="absolute -right-8 -bottom-10 text-white/[.06]" width="220" height="220" viewBox="0 0 24 24" fill="currentColor">
+        <path d={HEART} />
+      </svg>
+
+      <div className="relative grid gap-6 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-center md:gap-10 md:p-8">
+        {/* Bên trái: tên + số còn lại */}
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="font-display text-[19px] font-semibold text-[#f3d9a4] md:text-[22px]">Lâm Trường ♥ Lệ Huyền</span>
+            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-white/70">Cập nhật {fmtDateTime(updatedAt)}</span>
+          </div>
+          <div className="mt-5 text-[12px] font-medium tracking-[0.14em] text-white/65 uppercase">Còn lại sau chi phí</div>
+          <div className={`num mt-1 text-[34px] leading-none font-bold tracking-tight md:text-[46px] ${negative ? 'text-[#ffd0d0]' : 'text-white'}`}>
+            {money(net.total)}
+          </div>
+          <div className="mt-2 text-[13px] text-white/60">Tiền mừng thực tế − Tổng chi phí</div>
+
+          <div className="mt-5 grid max-w-md grid-cols-2 gap-2">
+            {(['TRAI', 'GAI'] as const).map((k) => (
+              <div key={k} className="rounded-2xl border border-white/10 bg-white/[.08] px-3.5 py-2.5">
+                <div className="flex items-center gap-1.5 text-[12px] text-white/70">
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: k === 'TRAI' ? '#9fc5e8' : '#f4cccc' }} />
+                  {k === 'TRAI' ? 'Nhà Trai' : 'Nhà Gái'}
+                </div>
+                <div className={`num text-[16px] font-semibold ${net[k] < 0 ? 'text-[#ffd0d0]' : ''}`}>{money(net[k])}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bên phải: tiền mừng vs chi phí */}
+        <div className="rounded-3xl border border-white/10 bg-white/[.07] p-3 backdrop-blur-sm md:p-5">
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
+            <HeroStat label="Tiền mừng thực tế" value={money(gifts.total)} accent="#b9f0c4" icon="M20 12v9H4v-9M2 7h20v5H2zM12 21V7" />
+            <HeroStat label="Tổng chi phí" value={money(cost.total)} accent="#ffd6a8" icon="M3 7h18v13H3zM3 7l2-4h14l2 4M12 11v5M9.5 13.5h5" />
+          </div>
+          <div className="mt-4">
+            <div className="flex items-baseline justify-between text-[12px] text-white/70">
+              <span>Tiền mừng đã bù được</span>
+              <b className="num text-[15px] text-white">{pct}% chi phí</b>
+            </div>
+            <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-white/15">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#f3d9a4] to-[#ffe9c4] transition-[width] duration-500"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <div className="mt-1.5 text-[12px] text-white/55">
+              {cost.total === 0
+                ? 'Chưa có chi phí nào'
+                : pct >= 100
+                  ? 'Tiền mừng đã đủ bù toàn bộ chi phí 🎉'
+                  : `Còn thiếu ${fmtMoney(cost.total - gifts.total)} đ để bù đủ chi phí`}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function HeroStat({ label, value, accent, icon }: { label: string; value: string; accent: string; icon: string }) {
+  return (
+    <div className="min-w-0 rounded-2xl bg-black/10 px-3 py-2.5 md:px-3.5 md:py-3">
+      <div className="flex items-center gap-1.5 text-[11.5px] whitespace-nowrap text-white/70 md:text-[12px]">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d={icon} />
+        </svg>
+        {label}
+      </div>
+      <div className="num mt-0.5 text-[16px] font-bold whitespace-nowrap md:text-[21px]" style={{ color: accent }}>
+        {value}
       </div>
     </div>
   )
