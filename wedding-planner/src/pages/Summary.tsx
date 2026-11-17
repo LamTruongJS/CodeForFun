@@ -98,26 +98,12 @@ export function SummaryPage() {
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_2px_12px_-4px_rgba(80,30,45,.12)]">
-          <table className="w-full text-[15px]">
-            <thead>
-              <tr className="text-[13px]">
-                <th className="w-10 bg-wine py-3 font-semibold text-white">#</th>
-                <th className="bg-wine py-3 pl-2 text-left font-semibold text-white">Hạng mục</th>
-                {SIDES.map((s) => (
-                  <th key={s.key} className="w-44 py-3 pr-4 text-right font-semibold text-white" style={{ background: s.key === 'total' ? '#6f1f37' : s.fg }}>
-                    {s.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {GROUPS.map((g) => (
-                <GroupRows key={g.title} title={g.title} icon={g.icon} rows={g.rows.map(byStt)} />
-              ))}
-              <GroupRows title="Còn lại" icon={<path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.9 4.5 6.6 4.5c2.1 0 3.5 1.1 4.4 2.4h2c.9-1.3 2.3-2.4 4.4-2.4 3.7 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21Z" />} rows={[net]} />
-            </tbody>
-          </table>
+        <div className="grid items-start gap-5 2xl:grid-cols-2">
+          <div className="grid gap-5">
+            <DesktopCard group={GROUPS[0]} rows={GROUPS[0].rows.map(byStt)} />
+            <DesktopCard group={GROUPS[1]} rows={GROUPS[1].rows.map(byStt)} money />
+          </div>
+          <DesktopCard group={GROUPS[2]} rows={GROUPS[2].rows.map(byStt)} money footer={net} />
         </div>
       )}
 
@@ -171,33 +157,91 @@ function MobileRow({ r }: { r: SummaryRow }) {
   )
 }
 
-function GroupRows({ title, icon, rows }: { title: string; icon: ReactNode; rows: SummaryRow[] }) {
+/** Màu chữ cho bản desktop: chi phí dùng màu chữ thường, chỉ dòng tổng mới tô màu. */
+function deskColor(tone: Tone, v: number, highlight?: boolean) {
+  if (v === 0) return '#c4b9bd'
+  if (tone === 'income') return '#2e7d32'
+  if (tone === 'net') return v < 0 ? '#d32f2f' : '#2e7d32'
+  if (tone === 'cost' && highlight) return '#b4501a'
+  return '#2b2326'
+}
+
+/** Bỏ "(VNĐ)" lặp lại trong tên dòng — đơn vị ghi một lần ở đầu thẻ. */
+const shortLabel = (l: string) => l.replace(' (VNĐ)', '').replace('(VNĐ, ', '(')
+
+function DesktopCard({
+  group,
+  rows,
+  money,
+  footer,
+}: {
+  group: (typeof GROUPS)[number]
+  rows: SummaryRow[]
+  money?: boolean
+  footer?: SummaryRow
+}) {
   return (
-    <>
-      <tr>
-        <td colSpan={5} className="border-t border-[#f0e6ea] bg-[#fcf8f9] px-4 pt-3 pb-1.5">
-          <GroupTitle icon={icon}>{title}</GroupTitle>
-        </td>
-      </tr>
-      {rows.map((r) => {
-        const tone = TONE[r.stt]
-        return (
-          <tr key={r.stt} className={`border-t border-[#f3ecef] ${r.highlight ? 'bg-[#fbeef2]' : ''}`}>
-            <td className="py-3 text-center text-[13px] text-gray-400">{r.stt}</td>
-            <td className={`py-3 pl-2 ${r.highlight ? 'font-bold text-wine' : ''}`}>{r.label}</td>
-            {SIDES.map((s) => (
-              <td
-                key={s.key}
-                className={`num py-3 pr-4 text-right whitespace-nowrap ${s.key === 'total' || r.highlight ? 'font-bold' : 'font-semibold'}`}
-                style={{ color: toneColor(tone, r[s.key]), background: r.highlight ? undefined : s.key === 'total' ? '#fcf6f8' : undefined }}
-              >
-                {fmt(r, r[s.key])}
-              </td>
+    <section className="overflow-hidden rounded-2xl border border-[#efe5e9] bg-white shadow-[0_2px_12px_-6px_rgba(80,30,45,.15)]">
+      <div className="flex items-center justify-between px-5 pt-4 pb-1">
+        <GroupTitle icon={group.icon}>{group.title}</GroupTitle>
+        {money && <span className="mb-2 text-[12px] text-gray-400">Đơn vị: VNĐ</span>}
+      </div>
+      <table className="w-full table-fixed text-[15px]">
+        <colgroup>
+          <col />
+          <col className="w-[19%]" />
+          <col className="w-[19%]" />
+          <col className="w-[21%]" />
+        </colgroup>
+        <thead>
+          <tr className="border-y border-[#f1e8eb] bg-[#fcf9fa] text-[12px] font-semibold tracking-wide uppercase">
+            <th className="py-2.5 pl-5 text-left text-gray-400">Hạng mục</th>
+            {SIDES.map((sd) => (
+              <th key={sd.key} className={`py-2.5 pr-5 text-right ${sd.key === 'total' ? 'bg-[#f8eef1]' : ''}`} style={{ color: sd.fg }}>
+                <span className="inline-flex items-center gap-1.5">
+                  {sd.key !== 'total' && <span className="h-2 w-2 rounded-full" style={{ background: sd.fg }} />}
+                  {sd.label}
+                </span>
+              </th>
             ))}
           </tr>
-        )
-      })}
-    </>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <DeskRow key={r.stt} r={r} />
+          ))}
+        </tbody>
+        {footer && (
+          <tfoot>
+            <DeskRow r={footer} footer />
+          </tfoot>
+        )}
+      </table>
+    </section>
+  )
+}
+
+function DeskRow({ r, footer }: { r: SummaryRow; footer?: boolean }) {
+  const tone = TONE[r.stt]
+  const strong = r.highlight
+  const rowBg = footer ? (r.total < 0 ? 'bg-[#fdf1f1]' : 'bg-[#eff8f0]') : strong ? 'bg-[#fbf3f5]' : ''
+  return (
+    <tr className={`border-t ${footer ? 'border-[#ead9df]' : 'border-[#f3ecef]'} ${rowBg} ${strong || footer ? '' : 'hover:bg-[#fdf9fa]'}`}>
+      <td className={`py-3 pl-5 leading-snug ${strong ? 'font-bold text-[#2b2326]' : 'text-[#4a3f43]'}`}>
+        {footer ? 'Còn lại (mừng thực tế − tổng chi phí)' : shortLabel(r.label)}
+      </td>
+      {SIDES.map((sd) => (
+        <td
+          key={sd.key}
+          className={`num py-3 pr-5 text-right whitespace-nowrap ${strong || sd.key === 'total' ? 'font-bold' : 'font-medium'} ${
+            sd.key === 'total' && !strong && !footer ? 'bg-[#fcf7f9]' : ''
+          } ${footer ? 'text-[16px]' : ''}`}
+          style={{ color: deskColor(tone, r[sd.key], strong) }}
+        >
+          {fmt(r, r[sd.key])}
+        </td>
+      ))}
+    </tr>
   )
 }
 
