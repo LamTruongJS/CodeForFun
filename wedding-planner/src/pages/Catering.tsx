@@ -33,7 +33,7 @@ type Calc = ReturnType<typeof cateringForSide>['items'][number]
 
 function Section({ side }: { side: GuestSide }) {
   const data = useAppStore((s) => s.data)
-  const { setPeoplePerTable, addItem, updateItem, deleteItem, reorderItem } = useAppStore()
+  const { updateSetting, addItem, updateItem, deleteItem, reorderItem } = useAppStore()
   const desktop = useIsDesktop()
   const c = useMemo(() => cateringForSide(data, side), [data, side])
   const [sheet, setSheet] = useState<CateringItem | 'new' | null>(null)
@@ -60,19 +60,26 @@ function Section({ side }: { side: GuestSide }) {
         <span className="h-2 w-2 rounded-full" style={{ background: theme.fg }} />
       </h2>
 
-      <div className="grid grid-cols-3 gap-2 p-3">
+      <div className="grid grid-cols-2 gap-2 p-3 md:grid-cols-4">
         <Stat label="Số khách" value={fmtInt(c.people)} color={theme.fg} bg={theme.soft} icon={ICON.people} />
-        <label className="rounded-2xl border border-[#f1e2bd] bg-[#fffaf0] px-1 pt-2 pb-1 text-center">
-          <div className="flex items-center justify-center gap-1 text-[11.5px] whitespace-nowrap text-[#9a7a2e]">
-            {ICON.pen12}
-            Người / bàn
-          </div>
-          <div className="text-[22px] leading-tight font-bold text-[#7a5a12]">
-            <InlineNumber value={c.peoplePerTable} required className="!px-0 !py-0.5 !text-center" onSave={(v) => setPeoplePerTable(side, v ?? 0)} />
-          </div>
-        </label>
-        <Stat label="Bàn dự kiến" value={fmtInt(c.tables)} color="#3f7d20" bg="#eef7e8" icon={ICON.table} />
+        <EditStat label="Người / bàn" value={c.peoplePerTable} required onSave={(v) => updateSetting(side, { peoplePerTable: v ?? 0 })} />
+        <EditStat
+          label="Bàn của họ hàng"
+          value={c.relativeTables}
+          title="Bàn phát sinh cho họ hàng / khách đi kèm, cộng thêm vào số bàn tiệc cưới"
+          onSave={(v) => updateSetting(side, { relativeTables: v ?? 0 })}
+        />
+        <Stat
+          label="Bàn dự kiến"
+          value={fmtInt(c.tables)}
+          sub={c.relativeTables ? `${fmtInt(c.guestTables)} theo khách + ${fmtInt(c.relativeTables)} họ hàng` : undefined}
+          color="#3f7d20"
+          bg="#eef7e8"
+          icon={ICON.table}
+        />
       </div>
+
+      <SubTitle>Tiệc cưới</SubTitle>
 
       <SortableList
         ids={c.items.map((x) => x.item.id)}
@@ -121,12 +128,12 @@ function Section({ side }: { side: GuestSide }) {
                     onDelete={() => askDelete(x.item)}
                   />
                 ))}
-                <tr>
-                  <td colSpan={5} className="!bg-wine px-3 py-3 font-semibold tracking-wide text-white">
-                    TỔNG CỘNG {label}
+                <tr className="total">
+                  <td colSpan={5} className="px-3 py-2.5 text-wine">
+                    Cộng tiệc cưới
                   </td>
-                  <td className="num !bg-wine px-2 py-3 text-right text-lg font-bold text-white">{fmtMoney(c.total)}</td>
-                  <td className="!bg-wine"></td>
+                  <td className="num px-2 py-2.5 text-right text-wine">{fmtMoney(c.itemsTotal)}</td>
+                  <td></td>
                 </tr>
               </tbody>
             </table>
@@ -136,9 +143,9 @@ function Section({ side }: { side: GuestSide }) {
             {c.items.map((x, i) => (
               <ItemCard key={x.item.id} x={x} stt={i + 1} onPatch={(p) => updateItem(x.item.id, p)} onToggle={(a) => toggleAuto(x.item, a)} onOpen={() => setSheet(x.item)} />
             ))}
-            <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#9b3352] to-[#7d2640] px-4 py-3.5 text-white shadow-md shadow-wine/20">
-              <span className="text-[13px] font-semibold tracking-wide">TỔNG CỘNG {label}</span>
-              <span className="num text-xl font-bold">{fmtMoney(c.total)}</span>
+            <div className="flex items-center justify-between rounded-2xl bg-blush px-4 py-3 text-wine">
+              <span className="text-[13px] font-semibold">Cộng tiệc cưới</span>
+              <span className="num text-lg font-bold">{fmtMoney(c.itemsTotal)}</span>
             </div>
           </div>
         )}
@@ -148,6 +155,39 @@ function Section({ side }: { side: GuestSide }) {
         <button onClick={() => setSheet('new')} className="h-11 w-full rounded-2xl border-[1.5px] border-dashed border-[#b9d6a5] font-medium text-[#4d7d2f] transition hover:bg-green-50">
           + Thêm hạng mục
         </button>
+      </div>
+
+      <SubTitle>Nhóm họ</SubTitle>
+      <div className="px-3">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2 rounded-2xl border border-[#efe5e9] p-3 md:grid-cols-[minmax(0,180px)_auto_minmax(0,220px)_1fr] md:gap-3">
+          <label className="block">
+            <span className="text-xs text-gray-500">Số bàn</span>
+            <div className="rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
+              <InlineNumber value={c.nhomHo.tables || null} placeholder="0" onSave={(v) => updateSetting(side, { nhomHoTables: v ?? 0 })} />
+            </div>
+          </label>
+          <span className="pb-2 text-gray-400">×</span>
+          <label className="block">
+            <span className="text-xs text-gray-500">Đơn giá 1 bàn (VNĐ)</span>
+            <div className="rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
+              <InlineNumber value={c.nhomHo.pricePerTable} placeholder="0" onSave={(v) => updateSetting(side, { nhomHoPricePerTable: v })} />
+            </div>
+          </label>
+          <div className="col-span-3 flex items-baseline justify-between gap-1.5 text-[13px] text-gray-500 md:col-span-1 md:flex-col md:items-end md:justify-end md:gap-0">
+            Thành tiền nhóm họ
+            <b className={`num text-[17px] ${c.nhomHo.total ? 'text-wine' : 'font-medium text-[#c9bec2]'}`}>{fmtMoney(c.nhomHo.total)}</b>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-3">
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-[#9b3352] to-[#7d2640] px-4 py-3.5 text-white shadow-md shadow-wine/20">
+          <span className="min-w-0">
+            <span className="block text-[13px] font-semibold tracking-wide">TỔNG CỘNG {label}</span>
+            <span className="block text-[11.5px] text-white/70">Tiệc cưới + nhóm họ</span>
+          </span>
+          <span className="num text-xl font-bold">{fmtMoney(c.total)}</span>
+        </div>
       </div>
 
       {sheet && (
@@ -201,18 +241,42 @@ const ICON = {
   pen: svg(PEN, 16),
 }
 
-function Stat({ label, value, color, bg, icon }: { label: string; value: string; color: string; bg: string; icon: ReactNode }) {
+function Stat({ label, value, sub, color, bg, icon }: { label: string; value: string; sub?: string; color: string; bg: string; icon: ReactNode }) {
   return (
     <div className="rounded-2xl px-1 pt-2 pb-1 text-center" style={{ background: bg }}>
       <div className="flex items-center justify-center gap-1 text-[11.5px] whitespace-nowrap" style={{ color }}>
         {icon}
         {label}
       </div>
-      <div className="num py-0.5 text-[22px] font-bold" style={{ color }}>
+      <div className="num py-0.5 text-[22px] leading-tight font-bold" style={{ color }}>
         {value}
       </div>
+      {sub && (
+        <div className="pb-0.5 text-[11px] leading-tight opacity-80" style={{ color }}>
+          {sub}
+        </div>
+      )}
     </div>
   )
+}
+
+/** Ô thống kê sửa được (nền vàng nhạt như các ô nhập khác). */
+function EditStat({ label, value, required, title, onSave }: { label: string; value: number; required?: boolean; title?: string; onSave: (v: number | null) => void }) {
+  return (
+    <label title={title} className="rounded-2xl border border-[#f1e2bd] bg-[#fffaf0] px-1 pt-2 pb-1 text-center">
+      <div className="flex items-center justify-center gap-1 text-[11.5px] whitespace-nowrap text-[#9a7a2e]">
+        {ICON.pen12}
+        {label}
+      </div>
+      <div className="text-[22px] leading-tight font-bold text-[#7a5a12]">
+        <InlineNumber value={value} required={required} placeholder="0" className="!px-0 !py-0.5 !text-center" onSave={onSave} />
+      </div>
+    </label>
+  )
+}
+
+function SubTitle({ children }: { children: ReactNode }) {
+  return <h3 className="px-4 pt-1 pb-2 text-[12px] font-semibold tracking-[0.12em] text-wine/80 uppercase">{children}</h3>
 }
 
 function AutoSwitch({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {

@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { arrayMove } from '@dnd-kit/sortable'
 import seedRaw from '../data/seed-data.json'
 import { parseImport, uid } from '../lib/schema'
-import type { AppData, CateringItem, Guest, GuestSide, Task } from '../lib/types'
+import type { AppData, CateringItem, CateringSetting, Guest, GuestSide, Task } from '../lib/types'
 
 /** Khóa localStorage của bản cũ (trước khi lưu lên server) — chỉ đọc 1 lần để chuyển dữ liệu lên. */
 export const LEGACY_DATA_KEY = 'wedding-planner:data'
@@ -22,7 +22,7 @@ type Actions = {
   deleteGuest: (id: string) => void
   reorderGuest: (side: GuestSide, activeId: string, overId: string) => void
   // khẩu phần
-  setPeoplePerTable: (side: GuestSide, value: number) => void
+  updateSetting: (side: GuestSide, patch: Partial<Omit<CateringSetting, 'side'>>) => void
   addItem: (side: GuestSide, patch: Partial<CateringItem> & { name: string }) => void
   updateItem: (id: string, patch: Partial<CateringItem>) => void
   deleteItem: (id: string) => void
@@ -95,9 +95,9 @@ export const useAppStore = create<State & Actions>()(
           }),
         reorderGuest: (side, a, o) => mut((d) => ({ guests: reorder(d.guests, (g) => g.side === side, a, o) })),
 
-        setPeoplePerTable: (side, value) =>
+        updateSetting: (side, patch) =>
           mut((d) => ({
-            cateringSettings: d.cateringSettings.map((s) => (s.side === side ? { ...s, peoplePerTable: value } : s)),
+            cateringSettings: d.cateringSettings.map((s) => (s.side === side ? { ...s, ...patch } : s)),
           })),
         addItem: (side, patch) =>
           mut((d) => ({

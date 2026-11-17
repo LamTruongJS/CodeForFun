@@ -15,7 +15,15 @@ export type Guest = {
   note: string | null
 }
 
-export type CateringSetting = { side: GuestSide; peoplePerTable: number }
+export type CateringSetting = {
+  side: GuestSide
+  peoplePerTable: number
+  /** Bàn phát sinh cho họ hàng / khách đi kèm, cộng thêm vào số bàn tiệc cưới */
+  relativeTables: number
+  /** Nhóm họ: số bàn và đơn giá 1 bàn (nhập tay) */
+  nhomHoTables: number
+  nhomHoPricePerTable: number | null
+}
 
 export type CateringItem = {
   id: string

@@ -7,7 +7,7 @@ import { useAppStore } from '../store/useAppStore'
 
 /** Ý nghĩa con số → màu */
 type Tone = 'count' | 'income' | 'cost' | 'net'
-const TONE: Record<number, Tone> = { 1: 'count', 2: 'count', 3: 'income', 4: 'income', 5: 'net', 6: 'count', 7: 'cost', 8: 'cost', 9: 'cost', 10: 'net' }
+const TONE: Record<number, Tone> = { 1: 'count', 2: 'count', 3: 'income', 4: 'income', 5: 'net', 6: 'count', 7: 'cost', 8: 'cost', 9: 'cost', 10: 'cost', 11: 'net' }
 
 const GROUPS: { title: string; icon: ReactNode; rows: number[] }[] = [
   {
@@ -23,7 +23,7 @@ const GROUPS: { title: string; icon: ReactNode; rows: number[] }[] = [
   {
     title: 'Chi phí',
     icon: <path d="M3 7h18v13H3zM3 7l2-4h14l2 4M12 11v5M9.5 13.5h5" />,
-    rows: [6, 7, 8, 9],
+    rows: [6, 7, 8, 9, 10],
   },
 ]
 
@@ -54,7 +54,7 @@ export function SummaryPage() {
   const unassigned = useMemo(() => taskCostBySide(data.tasks).unassignedCount, [data.tasks])
   const desktop = useIsDesktop()
   const done = data.tasks.filter((t) => t.status === 'DA_LAM').length
-  const net = byStt(10)
+  const net = byStt(11)
 
   return (
     <div>

@@ -21,6 +21,9 @@ const guest = z.object({
 const setting = z.object({
   side: guestSide,
   peoplePerTable: z.number().int().nonnegative().default(10),
+  relativeTables: z.number().int().nonnegative().default(0),
+  nhomHoTables: z.number().int().nonnegative().default(0),
+  nhomHoPricePerTable: money,
 })
 
 const item = z.object({
@@ -80,7 +83,8 @@ export function normalize(input: z.infer<typeof importSchema>): AppData {
     )
   }
   const settings = (['TRAI', 'GAI'] as const).map(
-    (side) => input.cateringSettings.find((s) => s.side === side) ?? { side, peoplePerTable: 10 },
+    (side) =>
+      input.cateringSettings.find((s) => s.side === side) ?? { side, peoplePerTable: 10, relativeTables: 0, nhomHoTables: 0, nhomHoPricePerTable: null },
   )
   return {
     schemaVersion: 1,

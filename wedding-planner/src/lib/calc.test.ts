@@ -122,6 +122,41 @@ describe('tiêu chí 5: đổi số người / bàn', () => {
   })
 })
 
+describe('bàn họ hàng và nhóm họ', () => {
+  const withSetting = (d: AppData, patch: Partial<AppData['cateringSettings'][number]>) => ({
+    ...d,
+    cateringSettings: d.cateringSettings.map((s) => (s.side === 'GAI' ? { ...s, ...patch } : s)),
+    cateringItems: d.cateringItems.map((i) => (i.side === 'GAI' && i.name === 'Thức ăn' ? { ...i, unitPrice: 1_000_000 } : i)),
+  })
+
+  it('dữ liệu cũ (không có trường mới) mặc định 0 bàn họ hàng, 0 nhóm họ', () => {
+    const c = cateringForSide(load(), 'GAI')
+    expect(c.relativeTables).toBe(0)
+    expect(c.nhomHo).toEqual({ tables: 0, pricePerTable: null, total: 0 })
+  })
+
+  it('bàn họ hàng cộng vào số bàn tiệc cưới, món theo số bàn tự tăng', () => {
+    const c = cateringForSide(withSetting(load(), { relativeTables: 3 }), 'GAI')
+    expect(c.guestTables).toBe(9) // CEIL(81/10)
+    expect(c.tables).toBe(12)
+    expect(c.itemsTotal).toBe(12_000_000)
+  })
+
+  it('nhóm họ = số bàn × đơn giá, cộng vào tổng và Tổng hợp', () => {
+    const d = withSetting(load(), { nhomHoTables: 4, nhomHoPricePerTable: 1_500_000 })
+    const c = cateringForSide(d, 'GAI')
+    expect(c.nhomHo.total).toBe(6_000_000)
+    expect(c.total).toBe(9_000_000 + 6_000_000)
+    const s = summary(d)
+    expect(s[7].GAI).toBe(6_000_000) // Chi phí nhóm họ
+    expect(s[9].GAI).toBe(s[6].GAI + s[7].GAI + s[8].GAI)
+  })
+
+  it('nhóm họ chưa nhập đơn giá → 0', () => {
+    expect(cateringForSide(withSetting(load(), { nhomHoTables: 4 }), 'GAI').nhomHo.total).toBe(0)
+  })
+})
+
 describe('6.3 / tiêu chí 6: còn lại', () => {
   it('1.000 − 400 = 600', () => expect(taskRemaining({ amount: 1000, deposit: 400 })).toBe(600))
   it('null = 0', () => expect(taskRemaining({ amount: null, deposit: 500 })).toBe(-500))
@@ -152,8 +187,8 @@ describe('6.5 tổng hợp', () => {
   it('cột Tổng cộng = Trai + Gái; hàng 9 = 7 + 8; hàng 10 = 4 − 9', () => {
     const s = summary(load())
     for (const r of s) expect(r.total).toBe(r.TRAI + r.GAI)
-    expect(s[8].TRAI).toBe(s[6].TRAI + s[7].TRAI)
-    expect(s[9].GAI).toBe(s[3].GAI - s[8].GAI)
+    expect(s[9].TRAI).toBe(s[6].TRAI + s[7].TRAI + s[8].TRAI)
+    expect(s[10].GAI).toBe(s[3].GAI - s[9].GAI)
     expect(s[6].TRAI).toBe(0) // Nhà Trai 0 khách → 0 bàn
   })
 })

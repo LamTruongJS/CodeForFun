@@ -34,14 +34,25 @@ export function cateringForSide(
   side: GuestSide,
 ) {
   const people = guestTotals(data.guests, side).attendees
-  const peoplePerTable = data.cateringSettings.find((s) => s.side === side)?.peoplePerTable ?? 10
-  const tables = tablesFor(people, peoplePerTable)
+  const setting = data.cateringSettings.find((s) => s.side === side)
+  const peoplePerTable = setting?.peoplePerTable ?? 10
+  // Số bàn tiệc cưới = bàn tính theo số khách + bàn phát sinh của họ hàng
+  const guestTables = tablesFor(people, peoplePerTable)
+  const relativeTables = n(setting?.relativeTables)
+  const tables = guestTables + relativeTables
   const items = bySortOrder(data.cateringItems.filter((i) => i.side === side)).map((item) => ({
     item,
     quantity: itemQuantity(item, tables),
     total: itemTotal(item, tables),
   }))
-  return { people, peoplePerTable, tables, items, total: items.reduce((s, x) => s + x.total, 0) }
+  const itemsTotal = items.reduce((s, x) => s + x.total, 0)
+  // Nhóm họ: số bàn × đơn giá 1 bàn
+  const nhomHo = {
+    tables: n(setting?.nhomHoTables),
+    pricePerTable: setting?.nhomHoPricePerTable ?? null,
+    total: n(setting?.nhomHoTables) * n(setting?.nhomHoPricePerTable),
+  }
+  return { people, peoplePerTable, guestTables, relativeTables, tables, items, itemsTotal, nhomHo, total: itemsTotal + nhomHo.total }
 }
 
 // 6.3 Công việc
@@ -104,10 +115,11 @@ export function summary(data: AppData): SummaryRow[] {
       negativeRed: true,
     }),
     row(6, 'Số bàn dự kiến', (s) => c[s].tables, 'count'),
-    row(7, 'Chi phí khẩu phần ăn (VNĐ)', (s) => c[s].total, 'money'),
-    row(8, 'Chi phí công việc (VNĐ, phần chung chia đôi)', (s) => t[s], 'money'),
-    row(9, 'Tổng chi phí (VNĐ)', cost, 'money', { highlight: true }),
-    row(10, 'Tiền mừng thực tế trừ tổng chi phí (VNĐ)', (s) => g[s].actual - cost(s), 'money', {
+    row(7, 'Chi phí tiệc cưới (VNĐ)', (s) => c[s].itemsTotal, 'money'),
+    row(8, 'Chi phí nhóm họ (VNĐ)', (s) => c[s].nhomHo.total, 'money'),
+    row(9, 'Chi phí công việc (VNĐ, phần chung chia đôi)', (s) => t[s], 'money'),
+    row(10, 'Tổng chi phí (VNĐ)', cost, 'money', { highlight: true }),
+    row(11, 'Tiền mừng thực tế trừ tổng chi phí (VNĐ)', (s) => g[s].actual - cost(s), 'money', {
       highlight: true,
       negativeRed: true,
     }),
