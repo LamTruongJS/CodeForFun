@@ -23,6 +23,9 @@ export type CateringSetting = {
   /** Nhóm họ: số bàn và đơn giá 1 bàn (nhập tay) */
   nhomHoTables: number
   nhomHoPricePerTable: number | null
+  /** Nhóm họ: nước uống = số lượng × đơn giá */
+  nhomHoDrinkQty: number
+  nhomHoDrinkPrice: number | null
 }
 
 export type CateringItem = {

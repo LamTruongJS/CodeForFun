@@ -132,7 +132,7 @@ describe('bàn họ hàng và nhóm họ', () => {
   it('dữ liệu cũ (không có trường mới) mặc định 0 bàn họ hàng, 0 nhóm họ', () => {
     const c = cateringForSide(load(), 'GAI')
     expect(c.relativeTables).toBe(0)
-    expect(c.nhomHo).toEqual({ tables: 0, pricePerTable: null, total: 0 })
+    expect(c.nhomHo).toEqual({ tables: 0, pricePerTable: null, foodTotal: 0, drinkQty: 0, drinkPrice: null, drinkTotal: 0, total: 0 })
   })
 
   it('bàn họ hàng cộng vào số bàn tiệc cưới, món theo số bàn tự tăng', () => {
@@ -150,6 +150,15 @@ describe('bàn họ hàng và nhóm họ', () => {
     const s = summary(d)
     expect(s[7].GAI).toBe(6_000_000) // Chi phí nhóm họ
     expect(s[9].GAI).toBe(s[6].GAI + s[7].GAI + s[8].GAI)
+  })
+
+  it('nhóm họ có cả nước uống: ăn + nước', () => {
+    const d = withSetting(load(), { nhomHoTables: 4, nhomHoPricePerTable: 1_500_000, nhomHoDrinkQty: 10, nhomHoDrinkPrice: 350_000 })
+    const c = cateringForSide(d, 'GAI')
+    expect(c.nhomHo.foodTotal).toBe(6_000_000)
+    expect(c.nhomHo.drinkTotal).toBe(3_500_000)
+    expect(c.nhomHo.total).toBe(9_500_000)
+    expect(summary(d)[7].GAI).toBe(9_500_000)
   })
 
   it('nhóm họ chưa nhập đơn giá → 0', () => {

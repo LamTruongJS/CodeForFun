@@ -159,23 +159,30 @@ function Section({ side }: { side: GuestSide }) {
 
       <SubTitle>Nhóm họ</SubTitle>
       <div className="px-3">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2 rounded-2xl border border-[#efe5e9] p-3 md:grid-cols-[minmax(0,180px)_auto_minmax(0,220px)_1fr] md:gap-3">
-          <label className="block">
-            <span className="text-xs text-gray-500">Số bàn</span>
-            <div className="rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
-              <InlineNumber value={c.nhomHo.tables || null} placeholder="0" onSave={(v) => updateSetting(side, { nhomHoTables: v ?? 0 })} />
-            </div>
-          </label>
-          <span className="pb-2 text-gray-400">×</span>
-          <label className="block">
-            <span className="text-xs text-gray-500">Đơn giá 1 bàn (VNĐ)</span>
-            <div className="rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
-              <InlineNumber value={c.nhomHo.pricePerTable} placeholder="0" onSave={(v) => updateSetting(side, { nhomHoPricePerTable: v })} />
-            </div>
-          </label>
-          <div className="col-span-3 flex items-baseline justify-between gap-1.5 text-[13px] text-gray-500 md:col-span-1 md:flex-col md:items-end md:justify-end md:gap-0">
-            Thành tiền nhóm họ
-            <b className={`num text-[17px] ${c.nhomHo.total ? 'text-wine' : 'font-medium text-[#c9bec2]'}`}>{fmtMoney(c.nhomHo.total)}</b>
+        <div className="divide-y divide-[#f3ecef] rounded-2xl border border-[#efe5e9]">
+          <NhomHoLine
+            title="Ăn"
+            qtyLabel="Số bàn"
+            priceLabel="Đơn giá 1 bàn (VNĐ)"
+            qty={c.nhomHo.tables}
+            price={c.nhomHo.pricePerTable}
+            total={c.nhomHo.foodTotal}
+            onQty={(v) => updateSetting(side, { nhomHoTables: v ?? 0 })}
+            onPrice={(v) => updateSetting(side, { nhomHoPricePerTable: v })}
+          />
+          <NhomHoLine
+            title="Nước uống"
+            qtyLabel="Số lượng"
+            priceLabel="Đơn giá (VNĐ)"
+            qty={c.nhomHo.drinkQty}
+            price={c.nhomHo.drinkPrice}
+            total={c.nhomHo.drinkTotal}
+            onQty={(v) => updateSetting(side, { nhomHoDrinkQty: v ?? 0 })}
+            onPrice={(v) => updateSetting(side, { nhomHoDrinkPrice: v })}
+          />
+          <div className="flex items-center justify-between rounded-b-2xl bg-blush px-3 py-2.5 text-wine">
+            <span className="text-[13px] font-semibold">Cộng nhóm họ</span>
+            <span className="num text-lg font-bold">{fmtMoney(c.nhomHo.total)}</span>
           </div>
         </div>
       </div>
@@ -272,6 +279,50 @@ function EditStat({ label, value, required, title, onSave }: { label: string; va
         <InlineNumber value={value} required={required} placeholder="0" className="!px-0 !py-0.5 !text-center" onSave={onSave} />
       </div>
     </label>
+  )
+}
+
+/** 1 dòng chi phí nhóm họ: số lượng × đơn giá = thành tiền */
+function NhomHoLine({
+  title,
+  qtyLabel,
+  priceLabel,
+  qty,
+  price,
+  total,
+  onQty,
+  onPrice,
+}: {
+  title: string
+  qtyLabel: string
+  priceLabel: string
+  qty: number
+  price: number | null
+  total: number
+  onQty: (v: number | null) => void
+  onPrice: (v: number | null) => void
+}) {
+  return (
+    <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-x-2 gap-y-1.5 p-3 md:grid-cols-[110px_minmax(0,170px)_auto_minmax(0,210px)_1fr] md:gap-x-3">
+      <div className="col-span-3 text-[13px] font-semibold text-[#2b2326] md:col-span-1 md:pb-2">{title}</div>
+      <label className="block">
+        <span className="text-xs text-gray-500">{qtyLabel}</span>
+        <div className="rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
+          <InlineNumber value={qty || null} placeholder="0" onSave={onQty} />
+        </div>
+      </label>
+      <span className="pb-2 text-gray-400">×</span>
+      <label className="block">
+        <span className="text-xs text-gray-500">{priceLabel}</span>
+        <div className="rounded-xl border border-[#f1e2bd] bg-[#fffaf0] font-semibold text-[#7a5a12]">
+          <InlineNumber value={price} placeholder="0" onSave={onPrice} />
+        </div>
+      </label>
+      <div className="col-span-3 flex items-baseline justify-between gap-1.5 text-[13px] text-gray-500 md:col-span-1 md:flex-col md:items-end md:justify-end md:gap-0">
+        Thành tiền
+        <b className={`num text-[17px] ${total ? 'text-wine' : 'font-medium text-[#c9bec2]'}`}>{fmtMoney(total)}</b>
+      </div>
+    </div>
   )
 }
 

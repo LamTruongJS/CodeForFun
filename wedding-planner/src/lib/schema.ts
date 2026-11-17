@@ -24,6 +24,8 @@ const setting = z.object({
   relativeTables: z.number().int().nonnegative().default(0),
   nhomHoTables: z.number().int().nonnegative().default(0),
   nhomHoPricePerTable: money,
+  nhomHoDrinkQty: z.number().int().nonnegative().default(0),
+  nhomHoDrinkPrice: money,
 })
 
 const item = z.object({
@@ -84,7 +86,7 @@ export function normalize(input: z.infer<typeof importSchema>): AppData {
   }
   const settings = (['TRAI', 'GAI'] as const).map(
     (side) =>
-      input.cateringSettings.find((s) => s.side === side) ?? { side, peoplePerTable: 10, relativeTables: 0, nhomHoTables: 0, nhomHoPricePerTable: null },
+      input.cateringSettings.find((s) => s.side === side) ?? { side, peoplePerTable: 10, relativeTables: 0, nhomHoTables: 0, nhomHoPricePerTable: null, nhomHoDrinkQty: 0, nhomHoDrinkPrice: null },
   )
   return {
     schemaVersion: 1,

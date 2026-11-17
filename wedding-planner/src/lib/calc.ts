@@ -46,11 +46,17 @@ export function cateringForSide(
     total: itemTotal(item, tables),
   }))
   const itemsTotal = items.reduce((s, x) => s + x.total, 0)
-  // Nhóm họ: số bàn × đơn giá 1 bàn
+  // Nhóm họ: ăn (số bàn × đơn giá 1 bàn) + nước uống (số lượng × đơn giá)
+  const foodTotal = n(setting?.nhomHoTables) * n(setting?.nhomHoPricePerTable)
+  const drinkTotal = n(setting?.nhomHoDrinkQty) * n(setting?.nhomHoDrinkPrice)
   const nhomHo = {
     tables: n(setting?.nhomHoTables),
     pricePerTable: setting?.nhomHoPricePerTable ?? null,
-    total: n(setting?.nhomHoTables) * n(setting?.nhomHoPricePerTable),
+    foodTotal,
+    drinkQty: n(setting?.nhomHoDrinkQty),
+    drinkPrice: setting?.nhomHoDrinkPrice ?? null,
+    drinkTotal,
+    total: foodTotal + drinkTotal,
   }
   return { people, peoplePerTable, guestTables, relativeTables, tables, items, itemsTotal, nhomHo, total: itemsTotal + nhomHo.total }
 }
