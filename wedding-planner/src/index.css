@@ -329,3 +329,29 @@ body.is-dragging * {
     font-size: 14px;
   }
 }
+
+/* ---------- Thanh cuộn mỏng, nhẹ (toàn app) ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(142, 44, 72, 0.22);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(142, 44, 72, 0.45);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+/* Firefox (không hỗ trợ ::-webkit-scrollbar) */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(142, 44, 72, 0.3) transparent;
+  }
+}
