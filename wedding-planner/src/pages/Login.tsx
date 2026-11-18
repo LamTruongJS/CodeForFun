@@ -24,9 +24,9 @@ export function LoginPage() {
 
       <div className="relative mx-auto flex min-h-dvh max-w-6xl flex-col items-center justify-center gap-5 px-5 py-5 lg:flex-row lg:gap-20 lg:px-10 lg:py-10">
         {/* Ảnh trong khung vòm */}
-        <div className="relative shrink-0">
+        <div className="relative mx-auto w-fit shrink-0">
           <div className="absolute -inset-2 rounded-t-[calc(min(10.5dvh,119px)+8px)] rounded-b-[30px] max-lg:[@media(min-height:740px)]:rounded-t-[calc(min(12.25dvh,119px)+8px)] border border-[#d9b87a]/70 lg:-inset-4 lg:rounded-t-[206px] lg:rounded-b-[36px]" />
-          <div className="relative aspect-[7/10] h-[30dvh] max-h-[340px] overflow-hidden rounded-t-[min(10.5dvh,119px)] rounded-b-[24px] max-lg:[@media(min-height:740px)]:h-[35dvh] max-lg:[@media(min-height:740px)]:rounded-t-[min(12.25dvh,119px)] shadow-[0_30px_60px_-25px_rgba(90,30,50,.55)] lg:aspect-auto lg:h-[560px] lg:max-h-none lg:w-[380px] lg:rounded-t-[190px] lg:rounded-b-[30px]">
+          <div className="relative h-[min(30dvh,340px)] w-[min(21dvh,238px)] overflow-hidden rounded-t-[min(10.5dvh,119px)] rounded-b-[24px] shadow-[0_30px_60px_-25px_rgba(90,30,50,.55)] max-lg:[@media(min-height:740px)]:h-[min(35dvh,340px)] max-lg:[@media(min-height:740px)]:w-[min(24.5dvh,238px)] max-lg:[@media(min-height:740px)]:rounded-t-[min(12.25dvh,119px)] lg:h-[560px] lg:w-[380px] lg:rounded-t-[190px] lg:rounded-b-[30px]">
             <picture className="block h-full w-full">
               <source media="(min-width: 1024px)" srcSet={PHOTO.src} />
               <img src={PHOTO.sm} alt="Lâm Trường và Lệ Huyền" className="block h-full w-full object-cover object-center" />
