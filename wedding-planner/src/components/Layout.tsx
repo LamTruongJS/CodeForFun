@@ -4,6 +4,7 @@ import { useAuth } from '../store/ui'
 import { ConfirmHost, ToastHost } from './Common'
 import { SaveIndicator, SyncGate } from './SyncGate'
 import { HERO_PHOTO } from '../lib/photos'
+import { ChatBot } from './ChatBot'
 import { flushNow, stopSync } from '../store/sync'
 
 const I = ({ d }: { d: ReactNode }) => (
@@ -143,6 +144,7 @@ export function Layout() {
         </div>
       </nav>
 
+      <ChatBot />
       <ToastHost />
       <ConfirmHost />
     </div>

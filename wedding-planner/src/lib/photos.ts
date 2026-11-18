@@ -5,6 +5,9 @@ export const WEDDING_DATE_TEXT = '20 . 12 . 2026'
 
 export const GATE_PHOTO = { src: '/photos/cong-cuoi.jpg', sm: '/photos/cong-cuoi-sm.jpg' }
 
+/** Ảnh cổng đã cắt lại cho khung vòm (tỉ lệ 7:10, hai người ở giữa khung) */
+export const ARCH_PHOTO = { src: '/photos/vom.jpg', sm: '/photos/vom-sm.jpg' }
+
 /** Ảnh dùng trong khung vòm ở thẻ đầu trang Tổng hợp */
 export const HERO_PHOTO = { src: '/photos/anh-02.jpg', sm: '/photos/anh-02-sm.jpg' }
 

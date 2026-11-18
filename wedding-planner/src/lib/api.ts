@@ -42,3 +42,46 @@ export const saveRemote = (token: string, data: AppData, baseVersion: string | n
   call(token, { method: 'PUT', body: JSON.stringify({ data, baseVersion }) }) as Promise<
     { version: string } | ({ conflict: true } & Remote)
   >
+
+// ---------- Trợ lý Claude ----------
+export type ChatTurn = { role: 'user' | 'assistant'; content: string }
+
+/**
+ * Hỏi trợ lý Claude; gọi onText với từng đoạn chữ khi về tới (hiện dần trên giao diện).
+ * Huỷ giữa chừng bằng signal.
+ */
+export async function streamChat(token: string, messages: ChatTurn[], context: string, onText: (t: string) => void, signal?: AbortSignal) {
+  let r: Response
+  try {
+    r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { Authorization: token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, context }),
+      signal,
+    })
+  } catch (e) {
+    if ((e as Error).name === 'AbortError') throw e
+    throw new ApiError('Không kết nối được server — kiểm tra mạng', 0)
+  }
+  if (!r.ok || !r.body) {
+    const body = await r.json().catch(() => ({}))
+    throw new ApiError(body?.error ?? `Lỗi server (${r.status})`, r.status)
+  }
+  const reader = r.body.getReader()
+  const decoder = new TextDecoder()
+  let buf = ''
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buf += decoder.decode(value, { stream: true })
+    let nl: number
+    while ((nl = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, nl).trim()
+      buf = buf.slice(nl + 1)
+      if (!line) continue
+      const ev = JSON.parse(line) as { type: string; text?: string; error?: string }
+      if (ev.type === 'text' && ev.text) onText(ev.text)
+      else if (ev.type === 'error') throw new ApiError(ev.error ?? 'Lỗi trợ lý', 500)
+    }
+  }
+}

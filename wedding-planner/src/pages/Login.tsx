@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../store/ui'
-import { ALBUM, WEDDING_DATE } from '../lib/photos'
+import { ARCH_PHOTO, WEDDING_DATE } from '../lib/photos'
 
 const HEART = 'M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.9 4.5 6.6 4.5c2.1 0 3.5 1.1 4.4 2.4h2c.9-1.3 2.3-2.4 4.4-2.4 3.7 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21Z'
-// Ảnh cổng cưới (bản không chữ — chữ "Save the date" được viết lại bằng font của trang)
-const PHOTO = ALBUM[0]
+// Ảnh cổng cưới (bản không chữ, đã cắt cho hai người nằm giữa khung vòm)
+const PHOTO = ARCH_PHOTO
 
 export function LoginPage() {
   const { loggedIn, login } = useAuth()
@@ -25,11 +25,11 @@ export function LoginPage() {
       <div className="relative mx-auto flex min-h-dvh max-w-6xl flex-col items-center justify-center gap-5 px-5 py-5 lg:flex-row lg:gap-20 lg:px-10 lg:py-10">
         {/* Ảnh trong khung vòm */}
         <div className="relative shrink-0">
-          <div className="absolute -inset-2 rounded-t-[calc(min(10.5dvh,119px)+8px)] rounded-b-[30px] border border-[#d9b87a]/70 lg:-inset-4 lg:rounded-t-[206px] lg:rounded-b-[36px]" />
-          <div className="relative aspect-[7/10] h-[30dvh] max-h-[340px] overflow-hidden rounded-t-[min(10.5dvh,119px)] rounded-b-[24px] shadow-[0_30px_60px_-25px_rgba(90,30,50,.55)] lg:aspect-auto lg:h-[560px] lg:max-h-none lg:w-[380px] lg:rounded-t-[190px] lg:rounded-b-[30px]">
-            <picture>
+          <div className="absolute -inset-2 rounded-t-[calc(min(10.5dvh,119px)+8px)] rounded-b-[30px] max-lg:[@media(min-height:740px)]:rounded-t-[calc(min(12.25dvh,119px)+8px)] border border-[#d9b87a]/70 lg:-inset-4 lg:rounded-t-[206px] lg:rounded-b-[36px]" />
+          <div className="relative aspect-[7/10] h-[30dvh] max-h-[340px] overflow-hidden rounded-t-[min(10.5dvh,119px)] rounded-b-[24px] max-lg:[@media(min-height:740px)]:h-[35dvh] max-lg:[@media(min-height:740px)]:rounded-t-[min(12.25dvh,119px)] shadow-[0_30px_60px_-25px_rgba(90,30,50,.55)] lg:aspect-auto lg:h-[560px] lg:max-h-none lg:w-[380px] lg:rounded-t-[190px] lg:rounded-b-[30px]">
+            <picture className="block h-full w-full">
               <source media="(min-width: 1024px)" srcSet={PHOTO.src} />
-              <img src={PHOTO.sm} alt="Lâm Trường và Lệ Huyền" className="h-full w-full object-cover object-[50%_35%]" />
+              <img src={PHOTO.sm} alt="Lâm Trường và Lệ Huyền" className="block h-full w-full object-cover object-center" />
             </picture>
           </div>
           <span className="absolute -bottom-4 left-1/2 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full bg-[#fbf6f1] text-wine shadow-sm lg:-bottom-5 lg:h-10 lg:w-10">

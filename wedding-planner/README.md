@@ -44,6 +44,22 @@ Chưa làm bước 1 thì web báo *“Server chưa được kết nối kho d�
 
 Muốn chạy local mà dùng chung dữ liệu với web thật: `npx vercel env pull .env.local` (hoặc tự tạo `.env.local` chứa 2 biến `KV_REST_API_URL`, `KV_REST_API_TOKEN`) rồi `npm run dev`.
 
+## Trợ lý Claude (hỏi đáp về dữ liệu)
+
+Nút **✦ Hỏi trợ lý** (góc phải dưới trên máy tính, góc trái dưới trên điện thoại) mở khung chat. Trợ lý đọc toàn bộ khách mời, khẩu phần ăn, công việc và số liệu tổng hợp **tại thời điểm hỏi**, trả lời hiện dần từng chữ.
+
+- Model: **Claude Opus 5.5** (`claude-opus-5-5`), gọi qua Vercel Function `api/chat.ts`. API key **chỉ nằm ở server**, không bao giờ xuống trình duyệt.
+- Chỉ người đã đăng nhập mới gọi được. Trợ lý chỉ đọc, không sửa dữ liệu.
+- Mỗi câu hỏi gửi kèm ~3.000 token dữ liệu → khoảng vài trăm đồng / câu (giá Opus 5.5: $4 / 1 triệu token vào, $20 / 1 triệu token ra).
+
+### Cài API key (làm 1 lần)
+
+1. Vercel → project **wedding-planner** → **Settings → Environment Variables** → thêm `ANTHROPIC_API_KEY` = key của anh (tick Production, Preview, Development) → Save.
+2. **Deployments** → bản mới nhất → **Redeploy**.
+3. Chạy local: tạo file `wedding-planner/.env.local` (đã được git bỏ qua) với một dòng `ANTHROPIC_API_KEY=...`, rồi chạy lại `npm run dev`.
+
+Chưa có key thì khung chat báo *“Server chưa có ANTHROPIC_API_KEY”*. Nên đặt **giới hạn chi tiêu** cho key trong Claude Console để yên tâm.
+
 ## Deploy lên Vercel (qua GitHub)
 
 ### Bước 1 — Đẩy code lên GitHub
@@ -86,6 +102,7 @@ vercel --prod   # deploy bản chính thức
 src/
   config/auth.ts          khóa lưu phiên đăng nhập
 api/data.ts               API dữ liệu (Vercel Function + Upstash Redis; dev dùng file JSON)
+api/chat.ts               API trợ lý Claude (stream câu trả lời)
   data/seed-data.json     dữ liệu gốc
   lib/schema.ts           zod schema + chuẩn hóa (sinh id, đánh lại sortOrder)
   lib/calc.ts             toàn bộ công thức tính (mục 6 của đặc tả)
