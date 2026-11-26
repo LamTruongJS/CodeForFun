@@ -49,7 +49,8 @@ Muốn chạy local mà dùng chung dữ liệu với web thật: `npx vercel en
 Nút **✦ Hỏi trợ lý** (góc phải dưới trên máy tính, góc trái dưới trên điện thoại) mở khung chat. Trợ lý đọc toàn bộ khách mời, khẩu phần ăn, công việc và số liệu tổng hợp **tại thời điểm hỏi**, trả lời hiện dần từng chữ.
 
 - Model: **Claude Opus 5.5** (`claude-opus-5-5`), gọi qua Vercel Function `api/chat.ts`. API key **chỉ nằm ở server**, không bao giờ xuống trình duyệt.
-- Chỉ người đã đăng nhập mới gọi được. Trợ lý chỉ đọc, không sửa dữ liệu.
+- Chỉ người đã đăng nhập mới gọi được.
+- **Nhờ sửa dữ liệu**: VD *"đánh dấu đã viết thiệp cho khách 1–10 Nhà Trai"*, *"thêm công việc thuê loa 2 triệu, chia đôi"*. Trợ lý không sửa thẳng mà hiện **thẻ đề xuất** (giá trị cũ → mới); bấm **Áp dụng** thì mới ghi vào dữ liệu (tự lưu lên server như khi tự sửa), bấm **Không** thì bỏ qua. Mỗi dòng được chỉ bằng STT + tên hiện tại — tên không khớp thì bỏ qua dòng đó, không sửa nhầm.
 - Mỗi câu hỏi gửi kèm ~3.000 token dữ liệu → khoảng vài trăm đồng / câu (giá Opus 5.5: $4 / 1 triệu token vào, $20 / 1 triệu token ra).
 
 ### Cài API key (làm 1 lần)

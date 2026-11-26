@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { create } from 'zustand'
-import { ApiError, streamChat, type ChatTurn } from '../lib/api'
+import { ApiError, streamChat, type ChatBlock, type ChatTurn } from '../lib/api'
+import { applyChanges, describeChanges, proposalSchema, type Change } from '../lib/chatTools'
 import { buildChatContext } from '../lib/chatContext'
 import { HERO_PHOTO } from '../lib/photos'
 import { useAuth } from '../store/ui'
@@ -13,64 +14,143 @@ const SUGGESTIONS = [
   'Còn những công việc nào chưa làm hoặc chưa trả hết tiền?',
   'Nhà Gái có những khách nào cần kiểm tra lại?',
   'Tổng chi phí hiện tại là bao nhiêu, mỗi nhà chịu bao nhiêu?',
+  'Đánh dấu đã viết thiệp cho khách số 1 đến 10 Nhà Trai',
 ]
 const QUICK = ['Còn bao nhiêu ngày nữa?', 'Việc nào cần làm gấp?', 'Tiền mừng đã bù được bao nhiêu?', 'Mỗi nhà bao nhiêu bàn?']
 
-type Msg = ChatTurn & { error?: boolean }
+/** Những gì hiện trong khung chat */
+type Item =
+  | { kind: 'user'; text: string }
+  | { kind: 'assistant'; text: string; error?: boolean }
+  | {
+      kind: 'proposal'
+      toolUseIds: string[]
+      summary?: string
+      changes: Change[]
+      status: 'pending' | 'applied' | 'rejected'
+      result?: string
+    }
 
 const SPARKLE = 'M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4L12 3ZM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z'
 
 // ---------- Trạng thái cuộc trò chuyện (giữ lại khi đóng / mở khung chat) ----------
-type ChatState = { msgs: Msg[]; busy: boolean }
-const useChat = create<ChatState>(() => ({ msgs: [], busy: false }))
+// items: để hiển thị; history: gửi cho Claude đúng định dạng Messages API (gồm cả tool_use / tool_result)
+type ChatState = { items: Item[]; history: ChatTurn[]; busy: boolean }
+const useChat = create<ChatState>(() => ({ items: [], history: [], busy: false }))
 let abortCtrl: AbortController | null = null
 
-function setLastAssistant(fn: (m: Msg) => Msg) {
-  useChat.setState((s) => ({ msgs: [...s.msgs.slice(0, -1), fn(s.msgs[s.msgs.length - 1])] }))
-}
+const pendingProposal = (items: Item[]) => items.find((i) => i.kind === 'proposal' && i.status === 'pending')
 
-async function ask(text: string) {
-  const q = text.trim()
-  const { msgs, busy } = useChat.getState()
-  if (!q || busy) return
-  // Lịch sử gửi đi: bỏ câu trả lời lỗi (và câu hỏi đi kèm) để hội thoại luôn xen kẽ user/assistant
-  const history: ChatTurn[] = []
-  for (const m of msgs) {
-    if (m.error) history.pop()
-    else history.push({ role: m.role, content: m.content })
-  }
-  const turns: ChatTurn[] = [...history, { role: 'user' as const, content: q }].slice(-20)
-  if (turns[0].role !== 'user') turns.shift()
-
-  useChat.setState({ msgs: [...msgs, { role: 'user', content: q }, { role: 'assistant', content: '' }], busy: true })
+/** Gọi Claude với lịch sử hiện tại; xử lý câu trả lời (chữ và/hoặc đề xuất thay đổi). */
+async function runTurn() {
   const ctrl = new AbortController()
   abortCtrl = ctrl
+  useChat.setState((s) => ({ busy: true, items: [...s.items, { kind: 'assistant', text: '' }] }))
+  const setLastText = (fn: (t: string) => string) =>
+    useChat.setState((s) => {
+      const items = [...s.items]
+      const last = items[items.length - 1]
+      if (last?.kind === 'assistant') items[items.length - 1] = { ...last, text: fn(last.text) }
+      return { items }
+    })
   try {
     // Luôn gửi dữ liệu mới nhất tại thời điểm hỏi
     const context = buildChatContext(useAppStore.getState().data)
-    await streamChat(useAuth.getState().token ?? '', turns, context, (t) => setLastAssistant((m) => ({ ...m, content: m.content + t })), ctrl.signal)
+    const history = useChat.getState().history.slice(-40)
+    while (history.length && (history[0].role !== 'user' || typeof history[0].content !== 'string')) history.shift()
+    const final = await streamChat(useAuth.getState().token ?? '', history, context, (t) => setLastText((x) => x + t), ctrl.signal)
+    if (!final) throw new ApiError('Không nhận được câu trả lời, thử lại nhé', 500)
+    useChat.setState((s) => ({ history: [...s.history, { role: 'assistant', content: final.content }] }))
+
+    const uses = final.content.filter((b): b is ChatBlock & { id: string; input: unknown } => b.type === 'tool_use')
+    if (uses.length) {
+      const changes: Change[] = []
+      const problems: string[] = []
+      let summary: string | undefined
+      for (const u of uses) {
+        const p = proposalSchema.safeParse(u.input)
+        if (p.success) {
+          changes.push(...p.data.changes)
+          summary ??= p.data.summary
+        } else problems.push(p.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '))
+      }
+      if (problems.length || final.stop_reason === 'max_tokens') {
+        // Đề xuất sai định dạng → báo lại cho Claude để nó sửa, không hiện thẻ
+        const msg = final.stop_reason === 'max_tokens' ? 'Đề xuất bị cắt vì quá dài, hãy chia nhỏ (tối đa ~150 thay đổi mỗi lần).' : `Đề xuất không hợp lệ: ${problems.join(' | ')}`
+        useChat.setState((s) => ({
+          history: [...s.history, { role: 'user', content: uses.map((u) => ({ type: 'tool_result', tool_use_id: u.id, content: msg, is_error: true })) }],
+        }))
+        dropEmptyAssistant()
+        return await runTurn()
+      }
+      dropEmptyAssistant()
+      useChat.setState((s) => ({ items: [...s.items, { kind: 'proposal', toolUseIds: uses.map((u) => u.id), summary, changes, status: 'pending' }] }))
+    } else dropEmptyAssistant()
   } catch (e) {
-    if ((e as Error).name !== 'AbortError') {
+    if ((e as Error).name === 'AbortError') {
+      dropEmptyAssistant()
+      // Dừng giữa chừng: bỏ câu hỏi chưa được trả lời khỏi lịch sử để lượt sau không lỗi
+      useChat.setState((s) => (s.history.at(-1)?.role === 'user' ? { history: s.history.slice(0, -1) } : {}))
+    } else {
       const msg = e instanceof ApiError ? e.message : 'Có lỗi xảy ra, thử lại nhé.'
-      setLastAssistant(() => ({ role: 'assistant', content: msg, error: true }))
+      setLastText(() => msg)
+      useChat.setState((s) => {
+        const items = [...s.items]
+        const last = items[items.length - 1]
+        if (last?.kind === 'assistant') items[items.length - 1] = { ...last, error: true }
+        // bỏ lượt người dùng chưa được trả lời khỏi lịch sử
+        return { items, history: s.history.at(-1)?.role === 'user' ? s.history.slice(0, -1) : s.history }
+      })
     }
   } finally {
     if (abortCtrl === ctrl) {
       abortCtrl = null
-      useChat.setState((s) => {
-        const last = s.msgs[s.msgs.length - 1]
-        // Dừng trước khi có chữ nào → bỏ cặp hỏi/đáp rỗng
-        return { busy: false, msgs: last?.role === 'assistant' && !last.content ? s.msgs.slice(0, -2) : s.msgs }
-      })
+      useChat.setState({ busy: false })
     }
   }
+}
+
+function dropEmptyAssistant() {
+  useChat.setState((s) => {
+    const last = s.items[s.items.length - 1]
+    return last?.kind === 'assistant' && !last.text.trim() ? { items: s.items.slice(0, -1) } : {}
+  })
+}
+
+async function ask(text: string) {
+  const q = text.trim()
+  const { busy, items } = useChat.getState()
+  if (!q || busy || pendingProposal(items)) return
+  useChat.setState((s) => ({ items: [...s.items, { kind: 'user', text: q }], history: [...s.history, { role: 'user', content: q }] }))
+  await runTurn()
+}
+
+/** Người dùng bấm Áp dụng / Không trên thẻ đề xuất. */
+async function decide(apply: boolean) {
+  const { items } = useChat.getState()
+  const p = pendingProposal(items)
+  if (!p || p.kind !== 'proposal') return
+  // Giữ lại mô tả "cũ → mới" theo dữ liệu TRƯỚC khi sửa để thẻ hiện đúng sau khi áp dụng
+  frozen.set(p.changes, describeChanges(useAppStore.getState().data, p.changes))
+  let result: string
+  if (apply) {
+    const r = applyChanges(p.changes)
+    result = r.errors.length
+      ? `Đã áp dụng ${r.applied}/${p.changes.length} thay đổi (dữ liệu kế hoạch ở lượt này đã được cập nhật). Không áp dụng được: ${r.errors.join('; ')}`
+      : `Người dùng đã bấm Áp dụng. Đã áp dụng thành công ${r.applied}/${p.changes.length} thay đổi. (Dữ liệu kế hoạch ở lượt này đã được cập nhật — là dữ liệu SAU khi sửa.)`
+  } else result = 'Người dùng bấm "Không" — không thay đổi gì.'
+  useChat.setState((s) => ({
+    items: s.items.map((i) => (i === p ? { ...p, status: apply ? 'applied' : 'rejected', result } : i)),
+    history: [...s.history, { role: 'user', content: p.toolUseIds.map((id) => ({ type: 'tool_result', tool_use_id: id, content: result })) }],
+  }))
+  await runTurn()
 }
 
 const stop = () => abortCtrl?.abort()
 const resetChat = () => {
   stop()
   abortCtrl = null
-  useChat.setState({ msgs: [], busy: false })
+  useChat.setState({ items: [], history: [], busy: false })
 }
 
 /**
@@ -124,7 +204,8 @@ export function ChatBot() {
 }
 
 function ChatPanel({ onClose }: { onClose: () => void }) {
-  const { msgs, busy } = useChat()
+  const { items, busy } = useChat()
+  const pending = Boolean(pendingProposal(items))
   const desktop = useIsDesktop()
   const vp = useVisibleViewport(!desktop)
   const [input, setInput] = useState('')
@@ -133,14 +214,14 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
 
   // Tự cuộn theo chữ mới — trừ khi người dùng đang kéo lên đọc lại đoạn trên
   const stickRef = useRef(true)
-  const lastCount = useRef(msgs.length)
+  const lastCount = useRef(items.length)
   useLayoutEffect(() => {
     const el = listRef.current
     if (!el) return
-    if (msgs.length > lastCount.current) stickRef.current = true // vừa gửi câu hỏi mới
-    lastCount.current = msgs.length
+    if (items.length > lastCount.current) stickRef.current = true // có tin nhắn / thẻ mới
+    lastCount.current = items.length
     if (stickRef.current) el.scrollTop = el.scrollHeight
-  }, [msgs, busy, vp?.h])
+  }, [items, busy, vp?.h])
 
   useEffect(() => {
     // Máy tính: đặt sẵn con trỏ vào ô nhập. Điện thoại: không, để bàn phím không che câu gợi ý.
@@ -157,7 +238,7 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
   }, [onClose, desktop])
 
   const send = (text: string) => {
-    if (!text.trim() || busy) return
+    if (!text.trim() || busy || pending) return
     setInput('')
     if (inputRef.current) inputRef.current.style.height = 'auto'
     ask(text)
@@ -165,7 +246,7 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
 
   // Điện thoại: khung chat = đúng phần màn hình còn thấy (phía trên bàn phím)
   const mobileStyle: CSSProperties | undefined = vp ? { top: vp.top, height: vp.h, bottom: 'auto' } : undefined
-  const lastIsDone = msgs.length > 0 && !busy
+  const lastIsDone = items.length > 0 && !busy && !pending
 
   return (
     <div
@@ -192,9 +273,9 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
         <img src={HERO_PHOTO.sm} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover object-[50%_20%] ring-2 ring-[#f3d9a4]/80 md:h-10 md:w-10" />
         <div className="min-w-0 flex-1 leading-tight">
           <div className="font-display text-[17px] font-semibold text-[#f3d9a4]">Trợ lý đám cưới</div>
-          <div className="truncate text-[11.5px] text-white/70">{busy ? 'Đang trả lời…' : 'Claude · đọc dữ liệu kế hoạch'}</div>
+          <div className="truncate text-[11.5px] text-white/70">{busy ? 'Đang trả lời…' : pending ? 'Chờ anh chị xác nhận thay đổi' : 'Claude · đọc & sửa dữ liệu kế hoạch'}</div>
         </div>
-        {msgs.length > 0 && (
+        {items.length > 0 && (
           <button
             type="button"
             onClick={resetChat}
@@ -219,14 +300,14 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
         }}
         className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-4 md:px-4"
       >
-        {msgs.length === 0 ? (
+        {items.length === 0 ? (
           <div className="pt-2 text-center md:pt-4">
             <svg className="mx-auto" width="32" height="32" viewBox="0 0 24 24" fill="#c79a4b">
               <path d={SPARKLE} />
             </svg>
             <p className="mt-2 font-display text-[20px] font-bold text-wine">Anh chị cần hỏi gì ạ?</p>
             <p className="mx-auto mt-1 max-w-[300px] text-[13px] text-gray-500">
-              Em đọc toàn bộ khách mời, khẩu phần ăn, công việc và số liệu tổng hợp để trả lời.
+              Em đọc toàn bộ khách mời, khẩu phần ăn, công việc để trả lời — và có thể sửa giúp, anh chị chỉ cần bấm xác nhận.
             </p>
             <div className="mt-5 grid gap-2 text-left">
               {SUGGESTIONS.map((s) => (
@@ -245,11 +326,13 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
             </div>
           </div>
         ) : (
-          msgs.map((m, i) =>
-            m.role === 'user' ? (
+          items.map((m, i) =>
+            m.kind === 'user' ? (
               <div key={i} className="flex justify-end pl-10">
-                <div className="rounded-[20px] rounded-br-md bg-wine px-3.5 py-2 text-[15px] leading-snug whitespace-pre-wrap text-white shadow-sm">{m.content}</div>
+                <div className="rounded-[20px] rounded-br-md bg-wine px-3.5 py-2 text-[15px] leading-snug whitespace-pre-wrap text-white shadow-sm">{m.text}</div>
               </div>
+            ) : m.kind === 'proposal' ? (
+              <ProposalCard key={i} p={m} />
             ) : (
               <div key={i} className="flex items-end gap-2 pr-4">
                 <span className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f3e7da]">
@@ -262,7 +345,7 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
                     m.error ? 'border-red-200 bg-red-50 text-red-700' : 'border-[#efe2d6] bg-white text-[#2b2326] shadow-sm'
                   }`}
                 >
-                  {m.content ? <RichText text={m.content} /> : <TypingDots />}
+                  {m.text ? <RichText text={m.text} /> : <TypingDots />}
                 </div>
               </div>
             ),
@@ -299,7 +382,8 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
             rows={1}
             value={input}
             enterKeyHint="send"
-            placeholder="Hỏi về khách mời, chi phí, công việc…"
+            disabled={pending}
+            placeholder={pending ? 'Bấm “Áp dụng” hoặc “Không” ở trên trước nhé' : 'Hỏi hoặc nhờ sửa khách mời, chi phí, công việc…'}
             onChange={(e) => {
               setInput(e.target.value)
               const el = e.target
@@ -324,7 +408,7 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
           ) : (
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!input.trim() || pending}
               aria-label="Gửi"
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-wine text-white transition active:scale-95 disabled:opacity-30"
             >
@@ -338,6 +422,95 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
       </form>
     </div>
   )
+}
+
+const KIND_STYLE = {
+  add: { mark: '+', cls: 'bg-[#eef7e8] text-[#3f7d20]' },
+  update: { mark: '✎', cls: 'bg-[#f6ece2] text-[#9a7432]' },
+  delete: { mark: '−', cls: 'bg-red-50 text-red-600' },
+} as const
+
+/** Thẻ đề xuất thay đổi: danh sách thay đổi + nút Áp dụng / Không. */
+function ProposalCard({ p }: { p: Extract<Item, { kind: 'proposal' }> }) {
+  const data = useAppStore((s) => s.data)
+  const busy = useChat((s) => s.busy)
+  // Thẻ đang chờ: mô tả theo dữ liệu hiện tại (thấy giá trị cũ → mới, phát hiện dòng không khớp)
+  const lines = proposalLines(p, data)
+  const [showAll, setShowAll] = useState(false)
+  const shown = showAll ? lines : lines.slice(0, 8)
+  const bad = lines.filter((l) => l.error).length
+  const deletes = p.changes.filter((c) => c.action.startsWith('delete')).length
+  return (
+    <div className="rounded-[22px] border border-[#e6d2b5] bg-gradient-to-b from-[#fffaf3] to-white p-3.5 shadow-[0_10px_30px_-20px_rgba(120,70,40,.6)]">
+      <div className="flex items-center gap-2">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-wine text-[13px] text-white">✎</span>
+        <div className="min-w-0 flex-1">
+          <div className="font-display text-[15.5px] font-bold text-wine">Đề xuất {p.changes.length} thay đổi</div>
+          {p.summary && <div className="text-[12.5px] leading-snug text-gray-500">{p.summary}</div>}
+        </div>
+      </div>
+      <ul className="mt-2.5 space-y-1.5">
+        {shown.map((l, i) => (
+          <li key={i} className={`flex gap-2 rounded-xl px-2 py-1.5 text-[13px] leading-snug ${l.error ? 'bg-red-50' : 'bg-white/70'}`}>
+            <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[12px] font-bold ${KIND_STYLE[l.kind].cls}`}>
+              {KIND_STYLE[l.kind].mark}
+            </span>
+            <span className="min-w-0">
+              <span className="font-semibold text-[#2b2326]">{l.title}</span>
+              {l.detail && <span className="block text-gray-500">{l.detail}</span>}
+              {l.error && <span className="block text-red-600">⚠ {l.error}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {lines.length > 8 && (
+        <button type="button" onClick={() => setShowAll((v) => !v)} className="mt-1.5 text-[12.5px] font-medium text-wine underline">
+          {showAll ? 'Thu gọn' : `Xem thêm ${lines.length - 8} thay đổi`}
+        </button>
+      )}
+      {p.status === 'pending' ? (
+        <>
+          {(bad > 0 || deletes > 0) && (
+            <p className="mt-2 text-[12px] text-[#9a5a1a]">
+              {deletes > 0 && `Có ${deletes} thao tác xoá. `}
+              {bad > 0 && `${bad} thay đổi không khớp dữ liệu sẽ được bỏ qua.`}
+            </p>
+          )}
+          <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+            <button
+              type="button"
+              disabled={busy || bad === lines.length}
+              onClick={() => decide(true)}
+              className="h-11 rounded-2xl bg-gradient-to-b from-[#9b3352] to-[#7d2640] text-[14.5px] font-semibold text-white shadow-md shadow-wine/20 transition active:scale-[.98] disabled:opacity-40"
+            >
+              Áp dụng {lines.length - bad} thay đổi
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => decide(false)}
+              className="h-11 rounded-2xl border border-[#e3cfb2] bg-white px-4 text-[14px] font-medium text-[#6b5a4a] transition active:bg-[#f6ece2] disabled:opacity-40"
+            >
+              Không
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className={`mt-2.5 rounded-xl px-3 py-2 text-[12.5px] font-medium ${p.status === 'applied' ? 'bg-[#eef7e8] text-[#3f7d20]' : 'bg-gray-100 text-gray-500'}`}>
+          {p.status === 'applied' ? '✓ ' : ''}
+          {p.result?.replace('Người dùng đã bấm Áp dụng. ', '').replace(/ ?\(Dữ liệu kế hoạch[^)]*\)/i, '').replace(/ ?\(dữ liệu kế hoạch[^)]*\)/i, '').replace('Người dùng bấm "Không" — ', 'Đã bỏ qua — ')}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Mô tả thay đổi — thẻ đã xử lý thì giữ nguyên mô tả lúc xử lý (không tính lại theo dữ liệu mới). */
+const frozen = new WeakMap<object, ReturnType<typeof describeChanges>>()
+function proposalLines(p: Extract<Item, { kind: 'proposal' }>, data: ReturnType<typeof useAppStore.getState>['data']) {
+  const cached = frozen.get(p.changes)
+  if (cached) return cached
+  return describeChanges(data, p.changes)
 }
 
 function TypingDots() {

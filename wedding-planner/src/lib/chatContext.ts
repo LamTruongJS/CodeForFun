@@ -29,17 +29,17 @@ export function buildChatContext(data: AppData): string {
     L.push(
       `Số khách ${c.people}, ${c.peoplePerTable} người/bàn → ${c.guestTables} bàn theo khách + ${c.relativeTables} bàn họ hàng = ${c.tables} bàn tiệc cưới.`,
     )
-    L.push('Tiệc cưới:')
+    L.push('Tiệc cưới (hạng mục nhóm TIEC):')
     for (const x of c.items) {
       const qty = x.item.quantityMode === 'AUTO_TABLES' ? `${x.quantity} (theo số bàn)` : String(x.quantity)
-      L.push(`- ${x.item.name}${x.item.unit ? ` (${x.item.unit})` : ''}: đơn giá ${money(x.item.unitPrice)} × ${qty} = ${money(x.total)}`)
+      L.push(`- ${x.item.sortOrder}. ${x.item.name}${x.item.unit ? ` (${x.item.unit})` : ''}: đơn giá ${money(x.item.unitPrice)} × ${qty} = ${money(x.total)}`)
     }
     L.push(`Cộng tiệc cưới: ${money(c.itemsTotal)}`)
-    L.push(`Nhóm họ: ${c.nhomHo.tables} bàn`)
+    L.push(`Nhóm họ (hạng mục nhóm NHOM_HO): ${c.nhomHo.tables} bàn`)
     if (c.nhomHo.items.length === 0) L.push('- (chưa có hạng mục)')
     for (const x of c.nhomHo.items) {
       const qty = x.item.quantityMode === 'AUTO_TABLES' ? `${x.quantity} (theo số bàn nhóm họ)` : String(x.quantity)
-      L.push(`- ${x.item.name}${x.item.unit ? ` (${x.item.unit})` : ''}: đơn giá ${money(x.item.unitPrice)} × ${qty} = ${money(x.total)}`)
+      L.push(`- ${x.item.sortOrder}. ${x.item.name}${x.item.unit ? ` (${x.item.unit})` : ''}: đơn giá ${money(x.item.unitPrice)} × ${qty} = ${money(x.total)}`)
     }
     L.push(`Cộng nhóm họ: ${money(c.nhomHo.total)}`, `TỔNG khẩu phần ${SIDE[side]}: ${money(c.total)}`)
   }
