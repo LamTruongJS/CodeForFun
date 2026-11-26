@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { Btn, DeleteBtn, Empty, Fab, PageTitle, TotalsBar, useIsDesktop } from '../components/Common'
+import { Btn, DeleteBtn, Empty, Fab, PageTitle, StickyTop, TotalsBar, useIsDesktop } from '../components/Common'
 import { EditDialog, type FieldDef, type Values } from '../components/EditDialog'
 import { ChipSelect, InlineNumber, InlineText, SIDE_OPTIONS, STATUS_OPTIONS } from '../components/Inline'
 import { DragHandle, DragPreview, SortableItem, SortableList } from '../components/Sortable'
@@ -55,6 +55,7 @@ export function TasksPage() {
         Công việc cần làm
       </PageTitle>
 
+      <StickyTop>
       <div className="mb-3 space-y-2">
         <FilterRow
           label="Bên"
@@ -88,6 +89,7 @@ export function TasksPage() {
           { label: 'Còn lại', value: fmtMoney(totals.remaining), color: totals.remaining > 0 ? '#C55A11' : undefined },
         ]}
       />
+      </StickyTop>
 
       {filtering && (
         <div className="mb-2 text-sm text-gray-500">

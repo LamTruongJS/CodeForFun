@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { Btn, DeleteBtn, Empty, Fab, PageTitle, TotalsBar, useIsDesktop } from '../components/Common'
+import { Btn, DeleteBtn, Empty, Fab, PageTitle, StickyTop, TotalsBar, useIsDesktop } from '../components/Common'
 import { EditDialog, type FieldDef, type Values } from '../components/EditDialog'
 import { InlineNumber, InlineText } from '../components/Inline'
 import { Select } from '../components/Select'
@@ -12,6 +12,7 @@ import { useAppStore } from '../store/useAppStore'
 
 const FIELDS: FieldDef[] = [
   { key: 'name', label: 'Họ và tên', type: 'text', required: true, placeholder: 'VD: V/C Anh chị Minh – Lan' },
+  { key: 'cardWritten', label: 'Đã viết thiệp', type: 'toggle', hint: 'Đã viết xong thiệp mời cho khách này' },
   { key: 'address', label: 'Địa chỉ', type: 'text', half: true, placeholder: 'VD: Phú Bình' },
   { key: 'attendees', label: 'Số lượng dự kiến đi', type: 'number', required: true, variant: 'stepper', half: true },
   { key: 'expectedGift', label: 'Mừng dự kiến', type: 'number', variant: 'money', half: true },
@@ -34,6 +35,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
   const [q, setQ] = useState('')
   const [addr, setAddr] = useState('')
   const [onlyCheck, setOnlyCheck] = useState(false)
+  const [onlyUnwritten, setOnlyUnwritten] = useState(false)
   const [sheet, setSheet] = useState<Guest | 'new' | null>(null)
   const newRowRef = useRef<HTMLInputElement>(null)
 
@@ -43,17 +45,19 @@ export function GuestsPage({ side }: { side: GuestSide }) {
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0], 'vi'))
   }, [guests])
 
-  const filtering = Boolean(q.trim() || addr || onlyCheck)
+  const filtering = Boolean(q.trim() || addr || onlyCheck || onlyUnwritten)
   const shown = useMemo(() => {
     const nq = norm(q.trim())
     return guests.filter(
       (g) =>
         (!nq || norm(g.name).includes(nq) || norm(g.address ?? '').includes(nq)) &&
         (!addr || g.address === addr) &&
-        (!onlyCheck || needsCheck(g)),
+        (!onlyCheck || needsCheck(g)) &&
+        (!onlyUnwritten || !g.cardWritten),
     )
-  }, [guests, q, addr, onlyCheck])
+  }, [guests, q, addr, onlyCheck, onlyUnwritten])
   const checkCount = guests.filter(needsCheck).length
+  const unwrittenCount = guests.filter((g) => !g.cardWritten).length
 
   const askDelete = async (g: Guest) => {
     if (await confirmDialog({ title: 'Xóa khách mời?', message: `“${g.name}” sẽ bị xóa khỏi danh sách.`, okText: 'Xóa', danger: true })) {
@@ -74,6 +78,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
         Khách mời {title}
       </PageTitle>
 
+      <StickyTop>
       <div className="mb-3 flex flex-wrap gap-2">
         <input
           className="field !h-11 min-w-0 flex-1 basis-full !bg-white sm:basis-48"
@@ -101,6 +106,16 @@ export function GuestsPage({ side }: { side: GuestSide }) {
             Cần kiểm tra ({checkCount})
           </button>
         )}
+        {guests.length > 0 && (
+          <button
+            onClick={() => setOnlyUnwritten((v) => !v)}
+            className={`h-11 rounded-full border-[1.5px] px-4 text-[13px] font-medium whitespace-nowrap ${
+              onlyUnwritten ? 'border-wine bg-wine text-white' : 'border-[#e3cfb2] bg-white text-wine'
+            }`}
+          >
+            Chưa viết thiệp ({unwrittenCount})
+          </button>
+        )}
       </div>
 
       <TotalsBar
@@ -111,6 +126,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
           { label: 'Mừng thực tế', value: fmtMoney(totals.actual) },
         ]}
       />
+      </StickyTop>
 
       {filtering && (
         <div className="mb-2 text-sm text-gray-500">
@@ -121,6 +137,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
               setQ('')
               setAddr('')
               setOnlyCheck(false)
+              setOnlyUnwritten(false)
             }}
           >
             Bỏ lọc
@@ -143,21 +160,23 @@ export function GuestsPage({ side }: { side: GuestSide }) {
       >
         {desktop ? (
           <div className="tbl-page overflow-x-auto rounded-xl shadow-sm xl:overflow-visible">
-            <table className="tbl table-fixed min-w-[1000px]">
+            <table className="tbl table-fixed min-w-[1090px]">
               <colgroup>
                 <col className="w-[68px]" />
                 <col />
-                <col className="w-[150px]" />
-                <col className="w-[92px]" />
-                <col className="w-[160px]" />
-                <col className="w-[160px]" />
-                <col className="w-[22%]" />
+                <col className="w-[84px]" />
+                <col className="w-[130px]" />
+                <col className="w-[88px]" />
+                <col className="w-[140px]" />
+                <col className="w-[140px]" />
+                <col className="w-[18%]" />
                 <col className="w-12" />
               </colgroup>
               <thead>
                 <tr>
                   <th className="sticky-l left-0">STT</th>
                   <th className="sticky-l left-[68px] text-left">Họ và tên</th>
+                  <th>Viết thiệp</th>
                   <th className="text-left">Địa chỉ</th>
                   <th className="text-right">Dự kiến đi</th>
                   <th className="text-right">Mừng dự kiến (VNĐ)</th>
@@ -169,7 +188,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
               <tbody>
                 {shown.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="py-10 text-center text-gray-400">
+                    <td colSpan={9} className="py-10 text-center text-gray-400">
                       {filtering ? 'Không có khách phù hợp' : 'Chưa có khách mời — nhập tên ở dòng bên dưới để thêm'}
                     </td>
                   </tr>
@@ -195,7 +214,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
                       }}
                     />
                   </td>
-                  <td colSpan={6} className="pad text-sm text-gray-400">
+                  <td colSpan={7} className="pad text-sm text-gray-400">
                     Số lượng dự kiến đi mặc định là 1
                   </td>
                 </tr>
@@ -206,7 +225,7 @@ export function GuestsPage({ side }: { side: GuestSide }) {
           <div className="space-y-2">
             {shown.length === 0 && <Empty>{filtering ? 'Không có khách phù hợp' : 'Chưa có khách mời. Bấm “+ Thêm khách”.'}</Empty>}
             {shown.map((g) => (
-              <GuestCard key={g.id} g={g} stt={stt.get(g.id)!} onOpen={() => setSheet(g)} />
+              <GuestCard key={g.id} g={g} stt={stt.get(g.id)!} onOpen={() => setSheet(g)} onPatch={(p) => updateGuest(g.id, p)} />
             ))}
           </div>
         )}
@@ -247,6 +266,9 @@ function GuestRow({ g, stt, onPatch, onDelete }: { g: Guest; stt: number; onPatc
       <td className="sticky-l left-[68px]">
         <InlineText value={g.name} required onSave={(v) => onPatch({ name: v! })} />
       </td>
+      <td className="text-center">
+        <CardCheck checked={g.cardWritten} onChange={(v) => onPatch({ cardWritten: v })} />
+      </td>
       <td>
         <InlineText value={g.address} onSave={(v) => onPatch({ address: v })} />
       </td>
@@ -269,7 +291,7 @@ function GuestRow({ g, stt, onPatch, onDelete }: { g: Guest; stt: number; onPatc
   )
 }
 
-function GuestCard({ g, stt, onOpen }: { g: Guest; stt: number; onOpen: () => void }) {
+function GuestCard({ g, stt, onOpen, onPatch }: { g: Guest; stt: number; onOpen: () => void; onPatch: (p: Partial<Guest>) => void }) {
   const check = needsCheck(g)
   return (
     <SortableItem
@@ -292,6 +314,19 @@ function GuestCard({ g, stt, onOpen }: { g: Guest; stt: number; onOpen: () => vo
             {g.attendees} người
           </span>
         </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onPatch({ cardWritten: !g.cardWritten })
+          }}
+          className={`mt-1 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[12px] font-medium ${
+            g.cardWritten ? 'border-[#cfe3c4] bg-[#eef7e8] text-[#3f7d20]' : 'border-dashed border-[#dcc4a0] bg-white text-[#9a7432]'
+          }`}
+        >
+          <CardCheck checked={g.cardWritten} small />
+          {g.cardWritten ? 'Đã viết thiệp' : 'Chưa viết thiệp'}
+        </button>
         {g.address && (
           <div className="mt-0.5 flex items-center gap-1 text-[13px] text-gray-500">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
@@ -307,5 +342,34 @@ function GuestCard({ g, stt, onOpen }: { g: Guest; stt: number; onOpen: () => vo
         {g.note && <div className={`mt-0.5 text-sm italic ${check ? 'text-[#C55A11]' : 'text-gray-500'}`}>{g.note}</div>}
       </div>
     </SortableItem>
+  )
+}
+
+/** Ô tick "đã viết thiệp" (tự vẽ cho đẹp và to, dễ bấm). Không có onChange → chỉ để hiển thị. */
+function CardCheck({ checked, onChange, small }: { checked: boolean; onChange?: (v: boolean) => void; small?: boolean }) {
+  const box = (
+    <span
+      className={`flex shrink-0 items-center justify-center rounded-md border-[1.5px] transition ${small ? 'h-3.5 w-3.5' : 'h-[22px] w-[22px]'} ${
+        checked ? 'border-[#3f7d20] bg-[#3f7d20] text-white' : 'border-[#d9c3a8] bg-white text-transparent'
+      }`}
+    >
+      <svg width={small ? 9 : 14} height={small ? 9 : 14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12.5l4.5 4.5L19 7.5" />
+      </svg>
+    </span>
+  )
+  if (!onChange) return box
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={checked ? 'Đã viết thiệp' : 'Chưa viết thiệp'}
+      title={checked ? 'Đã viết thiệp — bấm để bỏ' : 'Bấm khi đã viết thiệp'}
+      onClick={() => onChange(!checked)}
+      className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[#f6ece2]"
+    >
+      {box}
+    </button>
   )
 }

@@ -59,8 +59,11 @@ export function Btn({
 }
 
 /** Dòng TỔNG CỘNG dính khi cuộn. */
-export function TotalsBar({ items }: { items: { label: string; value: string; strong?: boolean; color?: string }[] }) {
-  // Ghi chiều cao thanh vào biến CSS để tiêu đề bảng dính ngay bên dưới khi cuộn trang
+/**
+ * Cụm dính ở đầu trang khi cuộn (máy tính): bộ lọc + thanh Tổng cộng.
+ * Ghi chiều cao cụm vào biến CSS --totals-h để tiêu đề bảng dính ngay bên dưới.
+ */
+export function StickyTop({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const el = ref.current
@@ -74,7 +77,15 @@ export function TotalsBar({ items }: { items: { label: string; value: string; st
     }
   }, [])
   return (
-    <div ref={ref} className="z-20 mb-4 rounded-2xl border border-[#ead9c4] bg-gradient-to-br from-[#fffaf3] to-[#f8ece0] px-4 py-3 shadow-[0_6px_20px_-10px_rgba(120,70,40,.35)] md:sticky md:top-[72px] md:flex md:items-center md:gap-6 md:px-5 md:py-2.5">
+    <div ref={ref} className="relative z-20 mb-4 md:sticky md:top-[64px] md:-mx-3 md:mb-1 md:bg-[#fbf6f1]/95 md:px-3 md:pt-2 md:pb-3 md:backdrop-blur-md">
+      {children}
+    </div>
+  )
+}
+
+export function TotalsBar({ items }: { items: { label: string; value: string; strong?: boolean; color?: string }[] }) {
+  return (
+    <div className="rounded-2xl border border-[#ead9c4] bg-gradient-to-br from-[#fffaf3] to-[#f8ece0] px-4 py-3 shadow-[0_6px_20px_-10px_rgba(120,70,40,.35)] md:flex md:items-center md:gap-6 md:px-5 md:py-2.5">
       <div className="mb-1.5 font-display text-[13px] font-semibold tracking-[0.12em] text-gold uppercase md:mb-0 md:shrink-0 md:border-r md:border-[#e6d2b5] md:pr-6">Tổng cộng</div>
       <div className={`grid flex-1 gap-x-3 gap-y-2 ${items.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
         {items.map((it) => (

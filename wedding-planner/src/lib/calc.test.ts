@@ -26,6 +26,7 @@ const guest = (p: Partial<Guest>): Guest => ({
   side: 'GAI',
   sortOrder: 999,
   name: 'Khách',
+  cardWritten: false,
   address: null,
   attendees: 1,
   expectedGift: null,
@@ -281,5 +282,19 @@ describe('formatTyping — thêm dấu chấm khi đang gõ', () => {
   })
   it('kết quả định dạng đọc lại đúng số', () => {
     expect(parseIntInput(formatTyping('38200000').value)).toEqual({ ok: true, value: 38_200_000 })
+  })
+})
+
+describe('viết thiệp', () => {
+  it('dữ liệu cũ chưa có trường cardWritten → mặc định chưa viết', () => {
+    const d = load()
+    expect(d.guests.length).toBeGreaterThan(0)
+    expect(d.guests.every((g) => g.cardWritten === false)).toBe(true)
+  })
+  it('giữ nguyên giá trị đã tick khi nhập lại', () => {
+    const raw = { ...seed, guests: seed.guests.map((g, i) => ({ ...g, cardWritten: i === 0 })) }
+    const r = parseImport(raw)
+    if (!r.ok) throw new Error(r.error)
+    expect(r.data.guests.filter((g) => g.cardWritten)).toHaveLength(1)
   })
 })

@@ -12,6 +12,7 @@ const guest = z.object({
   sortOrder: z.number(),
   name,
   address: nstr,
+  cardWritten: z.boolean().default(false),
   attendees: z.number().int().nonnegative().default(1),
   expectedGift: money,
   actualGift: money,

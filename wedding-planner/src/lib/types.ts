@@ -8,6 +8,8 @@ export type Guest = {
   side: GuestSide
   sortOrder: number
   name: string
+  /** Đã viết thiệp mời cho khách này chưa */
+  cardWritten: boolean
   address: string | null
   attendees: number
   expectedGift: number | null

@@ -74,6 +74,7 @@ export const useAppStore = create<State & Actions>()(
                 id: uid(),
                 side,
                 sortOrder: nextOrder(d.guests.filter((g) => g.side === side)),
+                cardWritten: false,
                 address: null,
                 attendees: 1,
                 expectedGift: null,

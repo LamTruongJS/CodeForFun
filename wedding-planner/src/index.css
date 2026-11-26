@@ -310,7 +310,7 @@ body.is-dragging * {
    tiêu đề dính ngay dưới thanh Tổng cộng (top 72px + chiều cao thanh), dòng tổng dính đáy màn hình */
 @media (min-width: 1280px) {
   .tbl-page .tbl thead th {
-    top: calc(72px + var(--totals-h, 0px));
+    top: calc(64px + var(--totals-h, 0px));
   }
   .tbl-page .tbl thead th:first-child {
     border-top-left-radius: 12px;

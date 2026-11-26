@@ -60,11 +60,12 @@ export function buildChatContext(data: AppData): string {
 
   for (const side of ['TRAI', 'GAI'] as const) {
     const g = guestTotals(data.guests, side)
-    L.push('', `## KHÁCH MỜI — ${SIDE[side]} (${g.count} thiệp, ${g.attendees} người dự kiến đi)`)
     const list = bySortOrder(data.guests.filter((x) => x.side === side))
+    const written = list.filter((x) => x.cardWritten).length
+    L.push('', `## KHÁCH MỜI — ${SIDE[side]} (${g.count} thiệp, ${g.attendees} người dự kiến đi, đã viết ${written}/${g.count} thiệp)`)
     if (list.length === 0) L.push('- (chưa có khách)')
     for (const x of list) {
-      const parts = [`${x.sortOrder}. ${x.name}`, x.address ?? 'chưa có địa chỉ', `${x.attendees} người`]
+      const parts = [`${x.sortOrder}. ${x.name}`, x.cardWritten ? 'đã viết thiệp' : 'chưa viết thiệp', x.address ?? 'chưa có địa chỉ', `${x.attendees} người`]
       if (x.expectedGift) parts.push(`mừng dự kiến ${money(x.expectedGift)}`)
       if (x.actualGift) parts.push(`mừng thực tế ${money(x.actualGift)}`)
       if (x.note) parts.push(`ghi chú: ${x.note}`)
