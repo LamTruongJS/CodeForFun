@@ -120,7 +120,15 @@ export function GuestsPage({ side }: { side: GuestSide }) {
 
       <TotalsBar
         items={[
-          { label: 'Số thiệp mời', value: `${totals.count}` },
+          {
+            label: 'Thiệp đã viết / tổng',
+            value: (
+              <>
+                {totals.count - unwrittenCount}
+                <span className="font-semibold text-gray-400">/{totals.count}</span>
+              </>
+            ),
+          },
           { label: 'Số lượng khách dự kiến đi', value: fmtInt(totals.attendees) },
           { label: 'Mừng dự kiến', value: fmtMoney(totals.expected) },
           { label: 'Mừng thực tế', value: fmtMoney(totals.actual) },

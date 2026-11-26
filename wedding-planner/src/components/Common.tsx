@@ -83,7 +83,7 @@ export function StickyTop({ children }: { children: ReactNode }) {
   )
 }
 
-export function TotalsBar({ items }: { items: { label: string; value: string; strong?: boolean; color?: string }[] }) {
+export function TotalsBar({ items }: { items: { label: string; value: ReactNode; strong?: boolean; color?: string }[] }) {
   return (
     <div className="rounded-2xl border border-[#ead9c4] bg-gradient-to-br from-[#fffaf3] to-[#f8ece0] px-4 py-3 shadow-[0_6px_20px_-10px_rgba(120,70,40,.35)] md:flex md:items-center md:gap-6 md:px-5 md:py-2.5">
       <div className="mb-1.5 font-display text-[13px] font-semibold tracking-[0.12em] text-gold uppercase md:mb-0 md:shrink-0 md:border-r md:border-[#e6d2b5] md:pr-6">Tổng cộng</div>
